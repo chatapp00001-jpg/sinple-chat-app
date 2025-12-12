@@ -58,19 +58,19 @@
   <script>
     /***** PASTE YOUR firebaseConfig from Firebase console (include databaseURL) *****/
     const firebaseConfig = {
-      apiKey: "AIzaSyB1kH5ViWhVpwJMaQEY0mcJhtEOia1k2aE",
-      authDomain: "chat-2d825.firebaseapp.com",
-      databaseURL: "https://chat-2d825-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "chat-2d825",
-      storageBucket: "chat-2d825.firebasestorage.app",
-      messagingSenderId: "397345569962",
-      appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
-      measurementId: "G-YVDC4J0CM5"
-    };
+  apiKey: "AIzaSyB1kH5ViWhVpwJMaQEY0mcJhtEOia1k2aE",
+  authDomain: "chat-2d825.firebaseapp.com",
+  databaseURL: "https://chat-2d825-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chat-2d825",
+  storageBucket: "chat-2d825.appspot.com", // fix here: "firebasestorage.app" → "appspot.com"
+  messagingSenderId: "397345569962",
+  appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
+  measurementId: "G-YVDC4J0CM5"
+};
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database("https://chat-2d825-default-rtdb.asia-southeast1.firebasedatabase.app");
-    const auth = firebase.auth();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 
     // DOM
     const msgInput = document.getElementById('msgInput');
@@ -103,24 +103,15 @@
     let uid = null;
     let typingTimeout = null;
 
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        auth.signInAnonymously().catch(err => console.error('Auth failed', err));
-        return;
-      }
-      uid = user.uid;
-      console.log('Signed in as', uid);
+ auth.onAuthStateChanged(user => {
+  if (!user) {
+    auth.signInAnonymously().catch(err => console.error('Auth failed', err));
+    return;
+  }
+  uid = user.uid;
+  console.log('Signed in as', uid);
+});
 
-      // set presence for current room
-      setupPresence(roomName);
-      // ensure typing removed on disconnect
-      const typingRef = db.ref('typing/' + roomName + '/' + uid);
-      typingRef.onDisconnect().remove();
-
-      // listen presence & typing updates
-      watchPresence(roomName);
-      watchTyping(roomName);
-    });
 
     // Update presence when room changes
     function setupPresence(room){
@@ -170,22 +161,24 @@
 
     // send message
     function sendMessage(){
-      const text = msgInput.value.trim();
-      if(!text || !uid) return;
-      displayName = nameInput.value.trim() || 'Anonymous';
-      roomName = roomInput.value.trim() || 'global';
-      localStorage.setItem('displayName', displayName);
-      localStorage.setItem('roomName', roomName);
-      displayNameEl.textContent = displayName;
-      roomNameEl.textContent = roomName;
+  const text = msgInput.value.trim();
+  if(!text || !uid) return; // won't send if uid missing
 
-      const payload = { name: displayName, text: text, ts: Date.now(), uid: uid };
-      const ref = db.ref('rooms/' + roomName + '/messages');
-      ref.push(payload, err => { if(err) console.error('Write failed', err); });
-      msgInput.value = '';
-      // clear typing
-      db.ref('typing/' + roomName + '/' + uid).remove();
-    }
+  displayName = nameInput.value.trim() || 'Anonymous';
+  roomName = roomInput.value.trim() || 'global';
+
+  const payload = { name: displayName, text: text, ts: Date.now(), uid: uid };
+  const ref = db.ref('rooms/' + roomName + '/messages');
+  ref.push(payload, err => {
+    if(err) console.error('Write failed', err);
+    else console.log('Message sent!');
+  });
+
+  msgInput.value = '';
+  // clear typing
+  db.ref('typing/' + roomName + '/' + uid).remove();
+}
+
 
     sendBtn.addEventListener('click', sendMessage);
     msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
