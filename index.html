@@ -17,7 +17,10 @@
     transition: background 0.3s, color 0.3s;
   }
 
-  body.dark { background: #121212; color: #e0e0e0; }
+  body.dark {
+    background: #121212;
+    color: #e0e0e0;
+  }
 
   .app {
     width: 100%;
@@ -32,7 +35,10 @@
     transition: background 0.3s, box-shadow 0.3s;
   }
 
-  body.dark .app { background: #1e1e1e; box-shadow: 0 6px 30px rgba(0,0,0,.5); }
+  body.dark .app {
+    background: #1e1e1e;
+    box-shadow: 0 6px 30px rgba(0,0,0,.5);
+  }
 
   header {
     padding: 12px 16px;
@@ -40,10 +46,13 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: color 0.3s, border-color 0.3s;
+    transition: color 0.3s;
   }
 
-  body.dark header { border-color: #333; color: #e0e0e0; }
+  body.dark header {
+    border-color: #333;
+    color: #e0e0e0;
+  }
 
   header h1 { font-size: 16px; margin: 0; }
 
@@ -53,11 +62,10 @@
     gap: 8px;
     font-size: 12px;
     text-align: left;
-    align-items: center;
   }
 
   #messages {
-    flex: 1;
+    height: 60vh;
     overflow: auto;
     padding: 16px;
     display: flex;
@@ -67,7 +75,9 @@
     transition: background 0.3s;
   }
 
-  body.dark #messages { background: linear-gradient(180deg,#2a2a2a,#1e1e1e); }
+  body.dark #messages {
+    background: linear-gradient(180deg,#2a2a2a,#1e1e1e);
+  }
 
   .msg {
     max-width: 75%;
@@ -80,7 +90,11 @@
     transition: background 0.3s, border-color 0.3s, color 0.3s;
   }
 
-  body.dark .msg { background: #2a2a2a; border-color: rgba(255,255,255,.1); color: #e0e0e0; }
+  body.dark .msg {
+    background: #2a2a2a;
+    border-color: rgba(255,255,255,.1);
+    color: #e0e0e0;
+  }
 
   .me { align-self: flex-end; background: #dff6e8; border-color: rgba(0,120,60,.06); }
   body.dark .me { background: #3a3a3a; border-color: rgba(255,255,255,.2); }
@@ -92,7 +106,7 @@
     border-top: 1px solid #eef2f7;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
     transition: border-color 0.3s;
   }
 
@@ -109,29 +123,24 @@
     transition: background 0.3s, color 0.3s, border-color 0.3s;
   }
 
-  body.dark input[type=text], body.dark button { background: #2a2a2a; color: #e0e0e0; border-color: rgba(255,255,255,.2); }
+  body.dark input[type=text], body.dark button {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border-color: rgba(255,255,255,.2);
+  }
 
   button { background: #2563eb; color: #fff; cursor: pointer; }
 
   .small { font-size: 12px; color: #6b7280; }
   body.dark .small { color: #c0c0c0; }
 
+  .typing { font-size: 13px; color: #475569; padding: 8px 12px; pos }
+  body.dark .typing { color: #aaa; }
+
   .online-list { font-size: 12px; color: #374151; }
   body.dark .online-list { color: #c0c0c0; }
 
   .avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; }
-
-  /* Typing indicator at bottom */
-  #typingBar {
-    height: 18px;
-    font-size: 12px;
-    color: #555;
-    line-height: 18px;
-    padding-left: 4px;
-    transition: color 0.3s;
-  }
-
-  body.dark #typingBar { color: #ccc; }
 
   /* Mobile adjustments */
   @media (max-width:480px){
@@ -151,14 +160,14 @@
       <div class="small">Name: <strong id="displayName">(not set)</strong></div>
       <div class="small">Room: <strong id="roomName">global</strong></div>
       <div class="online-list">Online: <span id="onlineCount">0</span></div>
-      <button id="darkModeBtn" style="margin-left:auto;padding:4px 8px;font-size:12px;">🌙 Dark Mode</button>
+      <div class="typing" id="typingEl" style="display:none">is typing...</div>
+      <button id="darkModeBtn" style="margin-left:auto;padding:4px 68x;font-size:12px;">🌙 Dark Mode</button>
     </div>
   </header>
 
   <div id="messages"></div>
 
   <footer>
-    <div id="typingBar"></div>
     <div style="display:flex;gap:8px;flex:1;align-items:center">
       <input id="nameInput" type="text" placeholder="Your display name" />
       <input id="roomInput" type="text" placeholder="Room name (default: global)" />
@@ -198,7 +207,7 @@ const displayNameEl = document.getElementById('displayName');
 const roomNameEl = document.getElementById('roomName');
 const sendBtn = document.getElementById('sendBtn');
 const clearBtn = document.getElementById('clearBtn');
-const typingBar = document.getElementById('typingBar');
+const typingEl = document.getElementById('typingEl');
 const onlineCountEl = document.getElementById('onlineCount');
 const darkModeBtn = document.getElementById('darkModeBtn');
 
@@ -260,11 +269,12 @@ function startTyping(){
 }
 
 function watchTyping(room){
-  const tRef = db.ref('typing/' + room);
-  tRef.on('value', snap => {
-    const val = snap.val() || {};
-    const names = Object.values(val).map(x => x.name).filter(Boolean);
-    typingBar.textContent = names.length > 0 ? names.join(', ') + ' typing...' : '';
+  const tRef=db.ref('typing/'+room);
+  tRef.on('value',snap=>{
+    const val=snap.val()||{};
+    const names=Object.values(val).map(x=>x.name).filter(Boolean);
+    if(names.length){ typingEl.style.display='block'; typingEl.textContent=names.join(', ')+ ' typing...'; }
+    else typingEl.style.display='none';
   });
 }
 
@@ -273,10 +283,7 @@ function sendMessage(){
   if(!text||!uid) return;
   const payload={name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
   const room=roomInput.value.trim()||'global';
-  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
-    msgInput.value='';
-    db.ref('typing/'+room+'/'+uid).remove();
-  });
+  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{msgInput.value=''; db.ref('typing/'+room+'/'+uid).remove();});
 }
 
 function listenRoom(room){
