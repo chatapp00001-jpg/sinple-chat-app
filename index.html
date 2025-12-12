@@ -3,39 +3,99 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Easy Chat with Reply, Edit & Delete</title>
+<title>Easy Chat Full</title>
 <style>
-body { font-family: Inter, system-ui, Arial; background:#f5f7fb; margin:0; padding:16px; display:flex; align-items:center; justify-content:center; min-height:100vh; transition: background 0.3s,color 0.3s;}
-body.dark { background:#121212;color:#e0e0e0;}
-.app { width:100%; max-width:720px; background:#fff; border-radius:12px; box-shadow:0 6px 30px rgba(20,30,60,.08); display:flex; flex-direction:column; overflow:hidden; margin:0 8px; transition: background 0.3s,box-shadow 0.3s;}
-body.dark .app { background:#1e1e1e; box-shadow:0 6px 30px rgba(0,0,0,.5);}
-header { padding:12px 16px; border-bottom:1px solid #eef2f7; display:flex; flex-direction:column; gap:8px; transition: color 0.3s;}
-body.dark header { border-color:#333; color:#e0e0e0;}
-header h1 { font-size:16px; margin:0;}
-.meta-bar { display:flex; flex-wrap:wrap; gap:8px; font-size:12px; text-align:left;}
-#messages { height:60vh; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:8px; background:linear-gradient(180deg,#f9fbff,#fff); transition: background 0.3s;}
-body.dark #messages { background:linear-gradient(180deg,#2a2a2a,#1e1e1e);}
-.msg { max-width:75%; padding:10px 12px; border-radius:10px; background:#eef6ff; border:1px solid rgba(0,60,120,.04); box-shadow:0 1px 0 rgba(0,0,0,.02); word-wrap:break-word; transition: background 0.3s,border-color 0.3s,color 0.3s; position:relative; cursor:pointer;}
-body.dark .msg { background:#2a2a2a; border-color:rgba(255,255,255,.1); color:#e0e0e0;}
-.me { align-self:flex-end; background:#dff6e8; border-color:rgba(0,120,60,.06);}
-body.dark .me { background:#3a3a3a; border-color:rgba(255,255,255,.2);}
-.meta { font-size:12px; opacity:.7; margin-bottom:6px;}
-.msg-text { margin-top:2px;}
-.reply-box { background:#000;color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;margin-bottom:4px;}
-footer { padding:12px; border-top:1px solid #eef2f7; display:flex; flex-direction:column; gap:8px; transition:border-color 0.3s;}
-body.dark footer { border-color:#333;}
-footer > div { display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
-input[type=text], button { flex:1; padding:10px 12px; border-radius:8px; border:1px solid #e6edf6; min-width:100px; transition: background 0.3s, color 0.3s, border-color 0.3s;}
-body.dark input[type=text], body.dark button { background:#2a2a2a; color:#e0e0e0; border-color:rgba(255,255,255,.2);}
-button { background:#2563eb;color:#fff; cursor:pointer;}
-.small { font-size:12px; color:#6b7280;}
-body.dark .small { color:#c0c0c0;}
-.typing { font-size:13px; color:#475569; padding:8px 12px;}
-body.dark .typing { color:#aaa;}
-.online-list { font-size:12px; color:#374151;}
-body.dark .online-list { color:#c0c0c0;}
-.avatar { width:28px; height:28px; border-radius:50%; display:inline-block; margin-right:8px; vertical-align:middle;}
-@media (max-width:480px){ #messages{height:50vh; padding:8px;} input[type=text],button{font-size:14px; padding:8px 10px;} .meta-bar{font-size:11px; gap:4px;} .avatar{width:24px;height:24px;} .msg{max-width:100%; font-size:14px;} }
+body {
+  font-family: Inter, system-ui, Arial;
+  background: #f5f7fb;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+body.dark { background: #121212; color: #e0e0e0; }
+.app {
+  width: 100%;
+  max-width: 720px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 30px rgba(20,30,60,.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0 8px;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+body.dark .app { background: #1e1e1e; box-shadow: 0 6px 30px rgba(0,0,0,.5); }
+header { padding: 12px 16px; border-bottom: 1px solid #eef2f7; display: flex; flex-direction: column; gap: 8px; transition: color 0.3s; }
+body.dark header { border-color: #333; color: #e0e0e0; }
+header h1 { font-size: 16px; margin: 0; }
+.meta-bar { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; text-align: left; }
+#messages {
+  height: 60vh;
+  overflow: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(180deg,#f9fbff,#fff);
+  transition: background 0.3s;
+}
+body.dark #messages { background: linear-gradient(180deg,#2a2a2a,#1e1e1e); }
+.msg {
+  max-width: 75%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #eef6ff;
+  border: 1px solid rgba(0,60,120,.04);
+  box-shadow: 0 1px 0 rgba(0,0,0,.02);
+  word-wrap: break-word;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+  position: relative;
+  cursor: pointer;
+}
+body.dark .msg { background: #2a2a2a; border-color: rgba(255,255,255,.1); color: #e0e0e0; }
+.me { align-self: flex-end; background: #dff6e8; border-color: rgba(0,120,60,.06); }
+body.dark .me { background: #3a3a3a; border-color: rgba(255,255,255,.2); }
+.meta { font-size: 12px; opacity: .7; margin-bottom: 6px; }
+.reply-box {
+  background: #000;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+footer { padding: 12px; border-top: 1px solid #eef2f7; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.3s; }
+body.dark footer { border-color: #333; }
+footer > div { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+input[type=text], button {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6edf6;
+  min-width: 100px;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+body.dark input[type=text], body.dark button { background: #2a2a2a; color: #e0e0e0; border-color: rgba(255,255,255,.2); }
+button { background: #2563eb; color: #fff; cursor: pointer; }
+.small { font-size: 12px; color: #6b7280; }
+body.dark .small { color: #c0c0c0; }
+.typing { font-size: 13px; color: #475569; padding: 8px 12px; }
+body.dark .typing { color: #aaa; }
+.online-list { font-size: 12px; color: #374151; }
+body.dark .online-list { color: #c0c0c0; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; }
+@media (max-width:480px){
+  #messages { height: 50vh; padding: 8px; }
+  input[type=text], button { font-size: 14px; padding: 8px 10px; }
+  .meta-bar { font-size: 11px; gap: 4px; }
+  .avatar { width: 24px; height: 24px; }
+  .msg { max-width: 100%; font-size: 14px; }
+}
 </style>
 </head>
 <body>
@@ -50,14 +110,16 @@ body.dark .online-list { color:#c0c0c0;}
       <button id="darkModeBtn" style="margin-left:auto;padding:4px 68x;font-size:12px;">🌙 Dark Mode</button>
     </div>
   </header>
+
   <div id="messages"></div>
+
   <footer>
     <div style="display:flex;gap:8px;flex:1;align-items:center">
-      <input id="nameInput" type="text" placeholder="Your display name"/>
-      <input id="roomInput" type="text" placeholder="Room name (default: global)"/>
+      <input id="nameInput" type="text" placeholder="Your display name" />
+      <input id="roomInput" type="text" placeholder="Room name (default: global)" />
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <input id="msgInput" type="text" placeholder="Type a message and press Enter"/>
+      <input id="msgInput" type="text" placeholder="Type a message and press Enter" />
       <div style="display:flex;gap:6px">
         <button id="sendBtn">Send</button>
         <button id="clearBtn" style="background:#ef4444">Clear</button>
@@ -82,31 +144,37 @@ const firebaseConfig = {
   measurementId: "G-YVDC4J0CM5"
 };
 firebase.initializeApp(firebaseConfig);
-const db=firebase.database(), auth=firebase.auth();
+const db = firebase.database();
+const auth = firebase.auth();
 
-const msgInput=document.getElementById('msgInput');
-const nameInput=document.getElementById('nameInput');
-const roomInput=document.getElementById('roomInput');
-const messagesEl=document.getElementById('messages');
-const displayNameEl=document.getElementById('displayName');
-const roomNameEl=document.getElementById('roomName');
-const sendBtn=document.getElementById('sendBtn');
-const clearBtn=document.getElementById('clearBtn');
-const typingEl=document.getElementById('typingEl');
-const onlineCountEl=document.getElementById('onlineCount');
-const darkModeBtn=document.getElementById('darkModeBtn');
+const msgInput = document.getElementById('msgInput');
+const nameInput = document.getElementById('nameInput');
+const roomInput = document.getElementById('roomInput');
+const messagesEl = document.getElementById('messages');
+const displayNameEl = document.getElementById('displayName');
+const roomNameEl = document.getElementById('roomName');
+const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+const typingEl = document.getElementById('typingEl');
+const onlineCountEl = document.getElementById('onlineCount');
+const darkModeBtn = document.getElementById('darkModeBtn');
 
-let displayName=localStorage.getItem('displayName')||'';
-let roomName=localStorage.getItem('roomName')||'global';
-let uid=null, typingTimeout=null, replyTo=null, editMsgKey=null;
+let displayName = localStorage.getItem('displayName') || '';
+let roomName = localStorage.getItem('roomName') || 'global';
+let uid = null;
+let typingTimeout = null;
+let replyTo = null;
+let editMsgKey = null;
 
-nameInput.value=displayName;
-roomInput.value=roomName;
-displayNameEl.textContent=displayName||'(not set)';
-roomNameEl.textContent=roomName;
+nameInput.value = displayName;
+roomInput.value = roomName;
+displayNameEl.textContent = displayName || '(not set)';
+roomNameEl.textContent = roomName;
 
-// Dark Mode
-if(localStorage.getItem('darkMode')==='true'){ document.body.classList.add('dark'); darkModeBtn.textContent='☀️ Light Mode'; }
+if(localStorage.getItem('darkMode')==='true'){
+  document.body.classList.add('dark');
+  darkModeBtn.textContent='☀️ Light Mode';
+}
 darkModeBtn.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
   const isDark=document.body.classList.contains('dark');
@@ -114,13 +182,18 @@ darkModeBtn.addEventListener('click', ()=>{
   darkModeBtn.textContent=isDark?'☀️ Light Mode':'🌙 Dark Mode';
 });
 
-function colorForId(id){ const colors=['#f97316','#ef4444','#06b6d4','#8b5cf6','#10b981','#3b82f6','#ef9a7a','#f43f5e']; let h=0; for(let i=0;i<id.length;i++) h=(h<<5)-h+id.charCodeAt(i); return colors[Math.abs(h)%colors.length]; }
+function colorForId(id){
+  const colors=['#f97316','#ef4444','#06b6d4','#8b5cf6','#10b981','#3b82f6','#ef9a7a','#f43f5e'];
+  let h=0; for(let i=0;i<id.length;i++) h=(h<<5)-h+id.charCodeAt(i);
+  return colors[Math.abs(h)%colors.length];
+}
 
 auth.onAuthStateChanged(user=>{ if(!user) auth.signInAnonymously(); else uid=user.uid; });
 
 function setupPresence(room){
   const conRef=db.ref('.info/connected');
-  conRef.on('value',snap=>{ if(!snap.val()) return;
+  conRef.on('value',snap=>{
+    if(!snap.val()) return;
     const pRef=db.ref('presence/'+room+'/'+uid);
     pRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
     pRef.onDisconnect().remove();
@@ -129,76 +202,128 @@ function setupPresence(room){
 
 function watchPresence(room){
   const pRef=db.ref('presence/'+room);
-  pRef.on('value',snap=>{ onlineCountEl.textContent=Object.keys(snap.val()||{}).length; });
+  pRef.on('value',snap=>{
+    const val = snap.val()||{};
+    onlineCountEl.textContent=Object.keys(val).length;
+  });
 }
 
-function startTyping(){ if(!uid) return; const tRef=db.ref('typing/'+roomName+'/'+uid); tRef.set({name:nameInput.value||'Anonymous', ts:Date.now()}); if(typingTimeout) clearTimeout(typingTimeout); typingTimeout=setTimeout(()=>tRef.remove(),1500); }
-function watchTyping(room){ const tRef=db.ref('typing/'+room); tRef.on('value',snap=>{ const val=snap.val()||{}; const names=Object.values(val).map(x=>x.name).filter(Boolean); typingEl.style.display=names.length?'block':'none'; typingEl.textContent=names.length?names.join(',')+' typing...':''; })}
+function startTyping(){
+  if(!uid) return;
+  const tRef=db.ref('typing/'+roomName+'/'+uid);
+  tRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
+  if(typingTimeout) clearTimeout(typingTimeout);
+  typingTimeout=setTimeout(()=>tRef.remove(),1500);
+}
+
+function watchTyping(room){
+  const tRef=db.ref('typing/'+room);
+  tRef.on('value',snap=>{
+    const val=snap.val()||{};
+    const names=Object.values(val).map(x=>x.name).filter(Boolean);
+    typingEl.style.display = names.length ? 'block' : 'none';
+    typingEl.textContent = names.length ? names.join(', ') + ' typing...' : '';
+  });
+}
 
 function sendMessage(){
-  const text=msgInput.value.trim();
-  if(!text||!uid) return;
-  const room=roomInput.value.trim()||'global';
-  if(editMsgKey){ // edit mode
-    db.ref('rooms/'+room+'/messages/'+editMsgKey).update({text}).then(()=>{msgInput.value=''; editMsgKey=null;});
-  } else {
-    const payload={name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
-    if(replyTo) payload.reply=replyTo;
-    db.ref('rooms/'+room+'/messages').push(payload).then(()=>{ msgInput.value=''; replyTo=null; });
+  const text = msgInput.value.trim();
+  if(!text || !uid) return;
+  const room = roomInput.value.trim()||'global';
+  if(editMsgKey){
+    db.ref('rooms/'+room+'/messages/'+editMsgKey).update({text});
+    editMsgKey = null;
+    msgInput.value='';
+    return;
   }
-  db.ref('typing/'+room+'/'+uid).remove();
+  const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
+  if(replyTo) payload.reply = replyTo;
+  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
+    msgInput.value='';
+    db.ref('typing/'+room+'/'+uid).remove();
+    replyTo = null;
+  });
+}
+
+function renderMessage(snap, update=false, room){
+  const m = snap.val(); 
+  m.key = snap.key;
+  const isMe = (m.uid && uid && m.uid===uid) || (m.name===displayName);
+
+  let el = messagesEl.querySelector(`[data-key="${m.key}"]`);
+  if(!el){
+    el = document.createElement('div'); 
+    el.setAttribute('data-key', m.key); 
+    el.className = 'msg'+(isMe?' me':'');
+    messagesEl.appendChild(el);
+  }
+
+  const color = colorForId(String(m.uid || m.name || ''));
+  el.innerHTML = `
+    ${m.reply ? `<div class="reply-box"><strong>${m.reply.name}</strong>: ${m.reply.text}</div>` : ''}
+    <div class="meta"><span class="avatar" style="background:${color}"></span><strong>${m.name||'Anonymous'}</strong> · ${new Date(m.ts).toLocaleTimeString()}</div>
+    <div class="msg-text">${m.text}</div>
+    <div style="margin-top:4px;">
+      <button class="delete-btn" data-type="me">Delete for me</button>
+      ${isMe ? `<button class="delete-btn" data-type="all">Delete for everyone</button>` : ''}
+      ${isMe ? `<button class="edit-btn">Edit</button>` : ''}
+    </div>
+  `;
+
+  el.querySelector('[data-type="me"]').addEventListener('click',()=>messagesEl.removeChild(el));
+
+  if(isMe){
+    const btnAll = el.querySelector('[data-type="all"]');
+    if(btnAll) btnAll.addEventListener('click', ()=>{
+      db.ref('rooms/'+room+'/messages/'+m.key).remove();
+    });
+
+    const btnEdit = el.querySelector('.edit-btn');
+    if(btnEdit) btnEdit.addEventListener('click', ()=>{
+      msgInput.value = m.text;
+      msgInput.focus();
+      editMsgKey = m.key;
+    });
+  }
+
+  el.addEventListener('click', ()=>{
+    replyTo = {name:m.name||'Anonymous', text:m.text};
+    msgInput.focus();
+  });
+
+  if(!update) messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 function listenRoom(room){
   messagesEl.innerHTML='';
   const ref=db.ref('rooms/'+room+'/messages').limitToLast(200);
-
-  ref.on('child_added',snap=>{ renderMessage(snap); });
-  ref.on('child_changed',snap=>{ renderMessage(snap,true); });
-  ref.on('child_removed',snap=>{
-    const el=messagesEl.querySelector(`[data-key="${snap.key}"]`);
-    if(el) messagesEl.removeChild(el);
+  ref.on('child_added', snap => renderMessage(snap, false, room));
+  ref.on('child_changed', snap => renderMessage(snap, true, room));
+  ref.on('child_removed', snap=>{
+    const msgEl = messagesEl.querySelector(`[data-key="${snap.key}"]`);
+    if(msgEl) messagesEl.removeChild(msgEl);
   });
 }
 
-function renderMessage(snap,update=false){
-  const m=snap.val(); m.key=snap.key;
-  const isMe=(m.uid&&uid&&m.uid===uid)||(m.name===displayName);
-  let el = messagesEl.querySelector(`[data-key="${m.key}"]`);
-  if(!el){
-    el=document.createElement('div'); el.setAttribute('data-key', m.key); el.className='msg'+(isMe?' me':'');
-    messagesEl.appendChild(el);
-  }
-  const color=colorForId(String(m.uid||m.name||''));
-  el.innerHTML=`
-    ${m.reply?`<div class="reply-box"><strong>${m.reply.name}</strong>: ${m.reply.text}</div>`:''}
-    <div class="meta"><span class="avatar" style="background:${color}"></span><strong>${m.name||'Anonymous'}</strong> · ${new Date(m.ts).toLocaleTimeString()}</div>
-    <div class="msg-text">${m.text}</div>
-    <div style="margin-top:4px;">
-      <button class="delete-btn" data-type="me">Delete for me</button>
-      ${isMe?`<button class="delete-btn" data-type="all">Delete for everyone</button>`:''}
-      ${isMe?`<button class="edit-btn">Edit</button>`:''}
-    </div>
-  `;
-
-  el.querySelector('[data-type="me"]').addEventListener('click',()=>messagesEl.removeChild(el));
-  if(isMe){
-    const btnAll=el.querySelector('[data-type="all"]');
-    if(btnAll) btnAll.addEventListener('click',()=>db.ref('rooms/'+room+'/messages/'+m.key).remove());
-    const btnEdit=el.querySelector('.edit-btn');
-    if(btnEdit) btnEdit.addEventListener('click',()=>{ msgInput.value=m.text; msgInput.focus(); editMsgKey=m.key; });
-  }
-  el.addEventListener('click',()=>{ replyTo={name:m.name||'Anonymous', text:m.text}; msgInput.focus(); });
-  if(!update) messagesEl.scrollTop=messagesEl.scrollHeight;
-}
-
 sendBtn.addEventListener('click', sendMessage);
-msgInput.addEventListener('keydown', e=>{ if(e.key==='Enter') sendMessage(); else startTyping(); });
+msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
 msgInput.addEventListener('input', startTyping);
 
-roomInput.addEventListener('change',()=>{ roomName=roomInput.value.trim()||'global'; roomNameEl.textContent=roomName; localStorage.setItem('roomName',roomName); setupPresence(roomName); listenRoom(roomName); watchPresence(roomName); watchTyping(roomName); });
-nameInput.addEventListener('change',()=>{ displayName=nameInput.value.trim()||'Anonymous'; displayNameEl.textContent=displayName; localStorage.setItem('displayName',displayName); if(uid) db.ref('presence/'+roomName+'/'+uid).update({name:displayName}); });
-clearBtn.addEventListener('click',()=>messagesEl.innerHTML='');
+roomInput.addEventListener('change', ()=>{
+  roomName = roomInput.value.trim()||'global';
+  roomNameEl.textContent = roomName;
+  localStorage.setItem('roomName', roomName);
+  setupPresence(roomName); listenRoom(roomName); watchPresence(roomName); watchTyping(roomName);
+});
+
+nameInput.addEventListener('change', ()=>{
+  displayName = nameInput.value.trim()||'Anonymous';
+  displayNameEl.textContent = displayName;
+  localStorage.setItem('displayName', displayName);
+  if(uid) db.ref('presence/'+roomName+'/'+uid).update({name:displayName});
+});
+
+clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
 
 listenRoom(roomName); setupPresence(roomName); watchPresence(roomName); watchTyping(roomName);
 </script>
