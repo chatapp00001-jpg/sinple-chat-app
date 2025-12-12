@@ -5,23 +5,201 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Simple Chat (Firebase) — Enhanced</title>
   <style>
-    body{font-family:Inter,system-ui,Arial;background:#f5f7fb;margin:0;padding:16px;display:flex;align-items:center;justify-content:center;min-height:100vh}
-    .app{width:100%;max-width:720px;background:#fff;border-radius:12px;box-shadow:0 6px 30px rgba(20,30,60,.08);display:flex;flex-direction:column;overflow:hidden}
-    header{padding:12px 16px;border-bottom:1px solid #eef2f7;display:flex;align-items:center;gap:12px}
-    header h1{font-size:16px;margin:0}
-    .meta-bar{margin-left:auto;text-align:right}
-    #messages{height:60vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(180deg,#f9fbff,#fff)}
-    .msg{max-width:75%;padding:10px 12px;border-radius:10px;background:#eef6ff;border:1px solid rgba(0,60,120,.04);box-shadow:0 1px 0 rgba(0,0,0,.02)}
-    .me{align-self:flex-end;background:#dff6e8;border-color:rgba(0,120,60,.06)}
-    .meta{font-size:12px;opacity:.7;margin-bottom:6px}
-    footer{padding:12px;border-top:1px solid #eef2f7;display:flex;gap:8px;align-items:flex-end}
-    input[type=text]{flex:1;padding:10px 12px;border-radius:8px;border:1px solid #e6edf6}
-    button{padding:10px 12px;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer}
-    .small{font-size:12px;color:#6b7280}
-    .controls{display:flex;gap:8px;align-items:center}
-    .typing{font-size:13px;color:#475569;padding:8px 12px}
-    .online-list{font-size:12px;color:#374151}
-    .avatar{width:28px;height:28px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:middle}
+    body {
+      font-family: Inter, system-ui, Arial;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 720px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 30px rgba(20,30,60,.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: 0 8px; /* mobile padding */
+    }
+
+    header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eef2f7;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    header h1 {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .meta-bar {
+      margin-left: 0;
+      text-align: left;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    #messages {
+      height: 60vh;
+      overflow: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: linear-gradient(180deg,#f9fbff,#fff);
+    }
+
+    .msg {
+      max-width: 75%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #eef6ff;
+      border: 1px solid rgba(0,60,120,.04);
+      box-shadow: 0 1px 0 rgba(0,0,0,.02);
+      word-wrap: break-word;
+    }
+
+    .me {
+      align-self: flex-end;
+      background: #dff6e8;
+      border-color: rgba(0,120,60,.06);
+    }
+
+    .meta {
+      font-size: 12px;
+      opacity: .7;
+      margin-bottom: 6px;
+    }
+
+    footer {
+      padding: 12px;
+      border-top: 1px solid #eef2f7;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    footer > div {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    input[type=text] {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e6edf6;
+      min-width: 100px;
+    }
+
+    button {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .typing {
+      font-size: 13px;
+      color: #475569;
+      padding: 8px 12px;
+    }
+
+    .online-list {
+      font-size: 12px;
+      color: #374151;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 480px) {
+      #messages {
+        height: 50vh;
+        padding: 8px;
+      }
+
+      input[type=text], button {
+        font-size: 14px;
+        padding: 8px 10px;
+      }
+
+      .meta-bar {ok
+        font-size: 11px;
+        gap: 4px;
+      }
+
+      .avatar {
+        width: 24px;
+        height: 24px;
+      }
+
+      .msg {
+        max-width: 100%;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Simple Chat — Enhanced</h1>
+      <div class="meta-bar">
+        <div class="small">Local: <strong id="displayName">(not set)</strong></div>
+        <div class="small">Room: <strong id="roomName">global</strong></div>
+        <div class="online-list">Online: <span id="onlineCount">0</span></div>
+        <div class="typing" id="typingEl" style="display:none">typing...</div>
+      </div>
+    </header>
+
+    <div id="messages"></div>
+
+    <footer>
+      <div style="display:flex;gap:8px;flex:1;align-items:center">
+        <input id="nameInput" type="text" placeholder="Your display name (e.g. Sudu)" />
+        <input id="roomInput" type="text" placeholder="Room name (default: global)" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="msgInput" type="text" placeholder="Type a message and press Enter" style="min-width:220px" />
+        <div style="display:flex;gap:6px"><button id="sendBtn">Send</button><button id="clearBtn" style="background:#ef4444">Clear</button></div>
+      </div>
+    </footer>
+  </div>
+</body>
   </style>
 </head>
 <body>
