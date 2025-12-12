@@ -57,12 +57,12 @@
 
   <script>
     /***** PASTE YOUR firebaseConfig from Firebase console (include databaseURL) *****/
-    const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyB1kH5ViWhVpwJMaQEY0mcJhtEOia1k2aE",
   authDomain: "chat-2d825.firebaseapp.com",
   databaseURL: "https://chat-2d825-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "chat-2d825",
-  storageBucket: "chat-2d825.appspot.com", // fix here: "firebasestorage.app" → "appspot.com"
+  storageBucket: "chat-2d825.appspot.com", // correct format
   messagingSenderId: "397345569962",
   appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
   measurementId: "G-YVDC4J0CM5"
@@ -70,6 +70,7 @@
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
 
 
     // DOM
@@ -160,24 +161,28 @@ const db = firebase.database();
     }
 
     // send message
-    function sendMessage(){
+ function sendMessage() {
   const text = msgInput.value.trim();
-  if(!text || !uid) return; // won't send if uid missing
+  if(!text) return;
 
-  displayName = nameInput.value.trim() || 'Anonymous';
-  roomName = roomInput.value.trim() || 'global';
+  if(!uid) {
+    console.error("User not authenticated yet");
+    return;
+  }
 
-  const payload = { name: displayName, text: text, ts: Date.now(), uid: uid };
-  const ref = db.ref('rooms/' + roomName + '/messages');
-  ref.push(payload, err => {
-    if(err) console.error('Write failed', err);
-    else console.log('Message sent!');
-  });
+  const name = nameInput.value.trim() || 'Anonymous';
+  const room = roomInput.value.trim() || 'global';
 
-  msgInput.value = '';
-  // clear typing
-  db.ref('typing/' + roomName + '/' + uid).remove();
+  const payload = { name: name, text: text, ts: Date.now(), uid: uid };
+  db.ref('rooms/' + room + '/messages').push(payload)
+    .then(() => {
+      console.log('Message sent!', payload);
+      msgInput.value = '';
+      db.ref('typing/' + room + '/' + uid).remove();
+    })
+    .catch(err => console.error('Failed to send message:', err));
 }
+
 
 
     sendBtn.addEventListener('click', sendMessage);
