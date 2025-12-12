@@ -17,10 +17,7 @@
     transition: background 0.3s, color 0.3s;
   }
 
-  body.dark {
-    background: #121212;
-    color: #e0e0e0;
-  }
+  body.dark { background: #121212; color: #e0e0e0; }
 
   .app {
     width: 100%;
@@ -35,10 +32,7 @@
     transition: background 0.3s, box-shadow 0.3s;
   }
 
-  body.dark .app {
-    background: #1e1e1e;
-    box-shadow: 0 6px 30px rgba(0,0,0,.5);
-  }
+  body.dark .app { background: #1e1e1e; box-shadow: 0 6px 30px rgba(0,0,0,.5); }
 
   header {
     padding: 12px 16px;
@@ -49,10 +43,7 @@
     transition: color 0.3s;
   }
 
-  body.dark header {
-    border-color: #333;
-    color: #e0e0e0;
-  }
+  body.dark header { border-color: #333; color: #e0e0e0; }
 
   header h1 { font-size: 16px; margin: 0; }
 
@@ -62,6 +53,7 @@
     gap: 8px;
     font-size: 12px;
     text-align: left;
+    align-items: center;
   }
 
   #messages {
@@ -75,9 +67,7 @@
     transition: background 0.3s;
   }
 
-  body.dark #messages {
-    background: linear-gradient(180deg,#2a2a2a,#1e1e1e);
-  }
+  body.dark #messages { background: linear-gradient(180deg,#2a2a2a,#1e1e1e); }
 
   .msg {
     max-width: 75%;
@@ -90,11 +80,7 @@
     transition: background 0.3s, border-color 0.3s, color 0.3s;
   }
 
-  body.dark .msg {
-    background: #2a2a2a;
-    border-color: rgba(255,255,255,.1);
-    color: #e0e0e0;
-  }
+  body.dark .msg { background: #2a2a2a; border-color: rgba(255,255,255,.1); color: #e0e0e0; }
 
   .me { align-self: flex-end; background: #dff6e8; border-color: rgba(0,120,60,.06); }
   body.dark .me { background: #3a3a3a; border-color: rgba(255,255,255,.2); }
@@ -123,26 +109,52 @@
     transition: background 0.3s, color 0.3s, border-color 0.3s;
   }
 
-  body.dark input[type=text], body.dark button {
-    background: #2a2a2a;
-    color: #e0e0e0;
-    border-color: rgba(255,255,255,.2);
-  }
+  body.dark input[type=text], body.dark button { background: #2a2a2a; color: #e0e0e0; border-color: rgba(255,255,255,.2); }
 
   button { background: #2563eb; color: #fff; cursor: pointer; }
 
   .small { font-size: 12px; color: #6b7280; }
   body.dark .small { color: #c0c0c0; }
 
-  .typing { font-size: 13px; color: #475569; padding: 8px 12px; }
-  body.dark .typing { color: #aaa; }
-
   .online-list { font-size: 12px; color: #374151; }
   body.dark .online-list { color: #c0c0c0; }
 
   .avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; }
 
-  /* Mobile adjustments */
+  /* Typing bar fixed at bottom (WhatsApp style) */
+  #typingBar {
+    display:none;
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 100%;
+    background: #f1f1f1;
+    color: #555;
+    padding: 6px 16px;
+    font-size: 13px;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body.dark #typingBar { background: #2a2a2a; color: #ccc; }
+
+  .dots { display: flex; gap: 3px; }
+  .dots span {
+    width: 6px; height: 6px; background: #555; border-radius: 50%;
+    display: inline-block; animation: bounce 1.4s infinite ease-in-out both;
+  }
+  .dots span:nth-child(1){ animation-delay:0s; }
+  .dots span:nth-child(2){ animation-delay:0.2s; }
+  .dots span:nth-child(3){ animation-delay:0.4s; }
+
+  body.dark .dots span { background: #ccc; }
+
+  @keyframes bounce { 0%,80%,100%{transform:scale(0);} 40%{transform:scale(1);} }
+
   @media (max-width:480px){
     #messages { height: 50vh; padding: 8px; }
     input[type=text], button { font-size: 14px; padding: 8px 10px; }
@@ -160,8 +172,7 @@
       <div class="small">Name: <strong id="displayName">(not set)</strong></div>
       <div class="small">Room: <strong id="roomName">global</strong></div>
       <div class="online-list">Online: <span id="onlineCount">0</span></div>
-      <div class="typing" id="typingEl" style="display:none">is typing...</div>
-      <button id="darkModeBtn" style="margin-left:auto;padding:4px 68x;font-size:12px;">🌙 Dark Mode</button>
+      <button id="darkModeBtn" style="margin-left:auto;padding:4px 8px;font-size:12px;">🌙</button>
     </div>
   </header>
 
@@ -174,9 +185,18 @@
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <input id="msgInput" type="text" placeholder="Type a message and press Enter" />
-      <div style="display:flex;gap:6px"><button id="sendBtn">Send</button><button id="clearBtn" style="background:#ef4444">Clear</button></div>
+      <div style="display:flex;gap:6px">
+        <button id="sendBtn">Send</button>
+        <button id="clearBtn" style="background:#ef4444">Clear</button>
+      </div>
     </div>
   </footer>
+</div>
+
+<!-- Typing indicator -->
+<div id="typingBar">
+  <span id="typingNames"></span>
+  <span class="dots"><span></span><span></span><span></span></span>
 </div>
 
 <!-- Firebase -->
@@ -192,8 +212,7 @@ const firebaseConfig = {
   projectId: "chat-2d825",
   storageBucket: "chat-2d825.appspot.com",
   messagingSenderId: "397345569962",
-  appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
-  measurementId: "G-YVDC4J0CM5"
+  appId: "1:397345569962:web:bac031c0cf9a394820a4d3"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -207,9 +226,10 @@ const displayNameEl = document.getElementById('displayName');
 const roomNameEl = document.getElementById('roomName');
 const sendBtn = document.getElementById('sendBtn');
 const clearBtn = document.getElementById('clearBtn');
-const typingEl = document.getElementById('typingEl');
 const onlineCountEl = document.getElementById('onlineCount');
 const darkModeBtn = document.getElementById('darkModeBtn');
+const typingBar = document.getElementById('typingBar');
+const typingNames = document.getElementById('typingNames');
 
 let displayName = localStorage.getItem('displayName') || '';
 let roomName = localStorage.getItem('roomName') || 'global';
@@ -221,19 +241,19 @@ roomInput.value = roomName;
 displayNameEl.textContent = displayName || '(not set)';
 roomNameEl.textContent = roomName;
 
-// Dark Mode load saved preference
+// Dark mode
 if(localStorage.getItem('darkMode')==='true'){
   document.body.classList.add('dark');
-  darkModeBtn.textContent='☀️ Light Mode';
+  darkModeBtn.textContent='☀️';
 }
-
 darkModeBtn.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
   const isDark=document.body.classList.contains('dark');
   localStorage.setItem('darkMode', isDark);
-  darkModeBtn.textContent=isDark?'☀️ Light Mode':'🌙 Dark Mode';
+  darkModeBtn.textContent=isDark?'☀️':'🌙';
 });
 
+// Utility: color for avatar
 function colorForId(id){
   const colors=['#f97316','#ef4444','#06b6d4','#8b5cf6','#10b981','#3b82f6','#ef9a7a','#f43f5e'];
   let h=0; for(let i=0;i<id.length;i++) h=(h<<5)-h+id.charCodeAt(i);
@@ -273,8 +293,10 @@ function watchTyping(room){
   tRef.on('value',snap=>{
     const val=snap.val()||{};
     const names=Object.values(val).map(x=>x.name).filter(Boolean);
-    if(names.length){ typingEl.style.display='block'; typingEl.textContent=names.join(', ')+ ' typing...'; }
-    else typingEl.style.display='none';
+    if(names.length){
+      typingBar.style.display='flex';
+      typingNames.textContent = names.join(', ') + (names.length>1?' are typing':' is typing');
+    } else typingBar.style.display='none';
   });
 }
 
@@ -283,7 +305,10 @@ function sendMessage(){
   if(!text||!uid) return;
   const payload={name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
   const room=roomInput.value.trim()||'global';
-  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{msgInput.value=''; db.ref('typing/'+room+'/'+uid).remove();});
+  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
+    msgInput.value='';
+    db.ref('typing/'+room+'/'+uid).remove();
+  });
 }
 
 function listenRoom(room){
