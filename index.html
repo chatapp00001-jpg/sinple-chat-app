@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Easy Chat with Reply & Delete</title>
+<title>Easy Chat with Reply, Edit & Delete</title>
 <style>
 body {
   font-family: Inter, system-ui, Arial;
@@ -55,14 +55,13 @@ body.dark #messages { background: linear-gradient(180deg,#2a2a2a,#1e1e1e); }
   word-wrap: break-word;
   transition: background 0.3s, border-color 0.3s, color 0.3s;
   position: relative;
-  cursor: pointer;
 }
 body.dark .msg { background: #2a2a2a; border-color: rgba(255,255,255,.1); color: #e0e0e0; }
 .me { align-self: flex-end; background: #dff6e8; border-color: rgba(0,120,60,.06); }
 body.dark .me { background: #3a3a3a; border-color: rgba(255,255,255,.2); }
 .meta { font-size: 12px; opacity: .7; margin-bottom: 6px; }
 .reply-box {
-  background: #000; /* black reply preview */
+  background: #000;
   color: #fff;
   padding: 6px 10px;
   border-radius: 8px;
@@ -164,6 +163,7 @@ let roomName = localStorage.getItem('roomName') || 'global';
 let uid = null;
 let typingTimeout = null;
 let replyTo = null;
+let editMsgKey = null;
 
 nameInput.value = displayName;
 roomInput.value = roomName;
@@ -176,9 +176,9 @@ if(localStorage.getItem('darkMode')==='true'){
 }
 darkModeBtn.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
-  const isDark=document.body.classList.contains('dark');
+  const isDark = document.body.classList.contains('dark');
   localStorage.setItem('darkMode', isDark);
-  darkModeBtn.textContent=isDark?'☀️ Light Mode':'🌙 Dark Mode';
+  darkModeBtn.textContent = isDark?'☀️ Light Mode':'🌙 Dark Mode';
 });
 
 function colorForId(id){
@@ -225,54 +225,78 @@ function watchTyping(room){
   });
 }
 
+// Send or Edit
 function sendMessage(){
   const text = msgInput.value.trim();
   if(!text || !uid) return;
-  const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
-  if(replyTo) payload.reply = replyTo;
-  const room = roomInput.value.trim()||'global';
-  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
-    msgInput.value='';
-    db.ref('typing/'+room+'/'+uid).remove();
-    replyTo = null;
-  });
+  const room = roomInput.value.trim() || 'global';
+
+  if(editMsgKey){
+    db.ref(`rooms/${room}/messages/${editMsgKey}`).update({ text }).then(()=>{
+      msgInput.value = '';
+      editMsgKey = null;
+      replyTo = null;
+    });
+  } else {
+    const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
+    if(replyTo) payload.reply = replyTo;
+    db.ref(`rooms/${room}/messages`).push(payload).then(()=>{
+      msgInput.value = '';
+      replyTo = null;
+      db.ref(`typing/${room}/${uid}`).remove();
+    });
+  }
 }
 
+// Listen Room
 function listenRoom(room){
   messagesEl.innerHTML='';
   const ref=db.ref('rooms/'+room+'/messages').limitToLast(200);
 
-  ref.on('child_added',snap=>{
-    const m = snap.val();
-    m.key = snap.key;
-    const isMe = (m.uid&&uid&&m.uid===uid)||(m.name===displayName);
+  ref.on('child_added', snap=>{
+    const m = snap.val(); m.key = snap.key;
+    const isMe = (m.uid && uid && m.uid===uid) || (m.name===displayName);
     const el = document.createElement('div');
-    const color=colorForId(String(m.uid||m.name||''));
-    el.className='msg'+(isMe?' me':'');
+    const color = colorForId(String(m.uid||m.name||''));
+    el.className = 'msg'+(isMe?' me':'');
     el.setAttribute('data-key', m.key);
     el.innerHTML = `
       ${m.reply ? `<div class="reply-box"><strong>${m.reply.name}</strong>: ${m.reply.text}</div>` : ''}
       <div class="meta"><span class="avatar" style="background:${color}"></span><strong>${m.name||'Anonymous'}</strong> · ${new Date(m.ts).toLocaleTimeString()}</div>
-      <div>${m.text}</div>
+      <div class="msg-text">${m.text}</div>
       <div style="margin-top:4px;">
         <button class="delete-btn" data-type="me">Delete for me</button>
         ${isMe?`<button class="delete-btn" data-type="all">Delete for everyone</button>`:''}
+        ${isMe?`<button class="edit-btn">Edit</button>`:''}
       </div>
     `;
+
+    // Delete handlers
     el.querySelector('[data-type="me"]').addEventListener('click',()=>messagesEl.removeChild(el));
     if(isMe){
       el.querySelector('[data-type="all"]').addEventListener('click',()=>db.ref('rooms/'+room+'/messages/'+m.key).remove());
     }
+
+    // Edit handler
+    if(isMe){
+      el.querySelector('.edit-btn').addEventListener('click', ()=>{
+        msgInput.value = m.text;
+        msgInput.focus();
+        editMsgKey = m.key;
+      });
+    }
+
+    // Reply handler
     el.addEventListener('click', ()=>{
       replyTo = {name:m.name||'Anonymous', text:m.text};
       msgInput.focus();
     });
+
     messagesEl.appendChild(el);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   });
 
-  // Handle removed messages
-  ref.on('child_removed',snap=>{
+  ref.on('child_removed', snap=>{
     const removedKey = snap.key;
     const msgEl = messagesEl.querySelector(`[data-key="${removedKey}"]`);
     if(msgEl) messagesEl.removeChild(msgEl);
@@ -280,24 +304,24 @@ function listenRoom(room){
 }
 
 sendBtn.addEventListener('click', sendMessage);
-msgInput.addEventListener('keydown',e=>{ if(e.key==='Enter') sendMessage(); else startTyping(); });
+msgInput.addEventListener('keydown', e=>{ if(e.key==='Enter') sendMessage(); else startTyping(); });
 msgInput.addEventListener('input', startTyping);
 
-roomInput.addEventListener('change',()=>{
+roomInput.addEventListener('change', ()=>{
   roomName = roomInput.value.trim()||'global';
   roomNameEl.textContent = roomName;
-  localStorage.setItem('roomName',roomName);
+  localStorage.setItem('roomName', roomName);
   setupPresence(roomName); listenRoom(roomName); watchPresence(roomName); watchTyping(roomName);
 });
 
-nameInput.addEventListener('change',()=>{
+nameInput.addEventListener('change', ()=>{
   displayName=nameInput.value.trim()||'Anonymous';
-  displayNameEl.textContent=displayName;
-  localStorage.setItem('displayName',displayName);
+  displayNameEl.textContent = displayName;
+  localStorage.setItem('displayName', displayName);
   if(uid) db.ref('presence/'+roomName+'/'+uid).update({name:displayName});
 });
 
-clearBtn.addEventListener('click',()=>messagesEl.innerHTML='');
+clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
 
 listenRoom(roomName); setupPresence(roomName); watchPresence(roomName); watchTyping(roomName);
 </script>
