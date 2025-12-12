@@ -16,11 +16,7 @@
     min-height: 100vh;
     transition: background 0.3s, color 0.3s;
   }
-
-  body.dark {
-    background: #121212;
-    color: #e0e0e0;
-  }
+  body.dark { background: #121212; color: #e0e0e0; }
 
   .app {
     width: 100%;
@@ -34,11 +30,7 @@
     margin: 0 8px;
     transition: background 0.3s, box-shadow 0.3s;
   }
-
-  body.dark .app {
-    background: #1e1e1e;
-    box-shadow: 0 6px 30px rgba(0,0,0,.5);
-  }
+  body.dark .app { background: #1e1e1e; box-shadow: 0 6px 30px rgba(0,0,0,.5); }
 
   header {
     padding: 12px 16px;
@@ -46,13 +38,9 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: color 0.3s;
+    transition: color 0.3s, border-color 0.3s;
   }
-
-  body.dark header {
-    border-color: #333;
-    color: #e0e0e0;
-  }
+  body.dark header { border-color: #333; color: #e0e0e0; }
 
   header h1 { font-size: 16px; margin: 0; }
 
@@ -62,10 +50,11 @@
     gap: 8px;
     font-size: 12px;
     text-align: left;
+    align-items: center;
   }
 
   #messages {
-    height: 60vh;
+    flex: 1;
     overflow: auto;
     padding: 16px;
     display: flex;
@@ -74,10 +63,7 @@
     background: linear-gradient(180deg,#f9fbff,#fff);
     transition: background 0.3s;
   }
-
-  body.dark #messages {
-    background: linear-gradient(180deg,#2a2a2a,#1e1e1e);
-  }
+  body.dark #messages { background: linear-gradient(180deg,#2a2a2a,#1e1e1e); }
 
   .msg {
     max-width: 75%;
@@ -89,12 +75,7 @@
     word-wrap: break-word;
     transition: background 0.3s, border-color 0.3s, color 0.3s;
   }
-
-  body.dark .msg {
-    background: #2a2a2a;
-    border-color: rgba(255,255,255,.1);
-    color: #e0e0e0;
-  }
+  body.dark .msg { background: #2a2a2a; border-color: rgba(255,255,255,.1); color: #e0e0e0; }
 
   .me { align-self: flex-end; background: #dff6e8; border-color: rgba(0,120,60,.06); }
   body.dark .me { background: #3a3a3a; border-color: rgba(255,255,255,.2); }
@@ -106,10 +87,9 @@
     border-top: 1px solid #eef2f7;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     transition: border-color 0.3s;
   }
-
   body.dark footer { border-color: #333; }
 
   footer > div { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -122,27 +102,28 @@
     min-width: 100px;
     transition: background 0.3s, color 0.3s, border-color 0.3s;
   }
-
-  body.dark input[type=text], body.dark button {
-    background: #2a2a2a;
-    color: #e0e0e0;
-    border-color: rgba(255,255,255,.2);
-  }
+  body.dark input[type=text], body.dark button { background: #2a2a2a; color: #e0e0e0; border-color: rgba(255,255,255,.2); }
 
   button { background: #2563eb; color: #fff; cursor: pointer; }
 
   .small { font-size: 12px; color: #6b7280; }
   body.dark .small { color: #c0c0c0; }
 
-  .typing { font-size: 13px; color: #475569; padding: 8px 12px; pos }
-  body.dark .typing { color: #aaa; }
-
   .online-list { font-size: 12px; color: #374151; }
   body.dark .online-list { color: #c0c0c0; }
 
   .avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; }
 
-  /* Mobile adjustments */
+  #typingBar {
+    height: 18px;
+    font-size: 12px;
+    color: #555;
+    line-height: 18px;
+    padding-left: 4px;
+    transition: color 0.3s;
+  }
+  body.dark #typingBar { color: #ccc; }
+
   @media (max-width:480px){
     #messages { height: 50vh; padding: 8px; }
     input[type=text], button { font-size: 14px; padding: 8px 10px; }
@@ -159,15 +140,15 @@
     <div class="meta-bar">
       <div class="small">Name: <strong id="displayName">(not set)</strong></div>
       <div class="small">Room: <strong id="roomName">global</strong></div>
-      <div class="online-list">Online: <span id="onlineCount">0</span></div>
-      <div class="typing" id="typingEl" style="display:none">is typing...</div>
-      <button id="darkModeBtn" style="margin-left:auto;padding:4px 68x;font-size:12px;">🌙 Dark Mode</button>
+      <div class="online-list">Online: <span id="onlineList">0</span></div>
+      <button id="darkModeBtn" style="margin-left:auto;padding:4px 8px;font-size:12px;">🌙 Dark Mode</button>
     </div>
   </header>
 
   <div id="messages"></div>
 
   <footer>
+    <div id="typingBar"></div>
     <div style="display:flex;gap:8px;flex:1;align-items:center">
       <input id="nameInput" type="text" placeholder="Your display name" />
       <input id="roomInput" type="text" placeholder="Room name (default: global)" />
@@ -179,7 +160,6 @@
   </footer>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -207,8 +187,8 @@ const displayNameEl = document.getElementById('displayName');
 const roomNameEl = document.getElementById('roomName');
 const sendBtn = document.getElementById('sendBtn');
 const clearBtn = document.getElementById('clearBtn');
-const typingEl = document.getElementById('typingEl');
-const onlineCountEl = document.getElementById('onlineCount');
+const typingBar = document.getElementById('typingBar');
+const onlineListEl = document.getElementById('onlineList');
 const darkModeBtn = document.getElementById('darkModeBtn');
 
 let displayName = localStorage.getItem('displayName') || '';
@@ -221,12 +201,11 @@ roomInput.value = roomName;
 displayNameEl.textContent = displayName || '(not set)';
 roomNameEl.textContent = roomName;
 
-// Dark Mode load saved preference
+// Dark Mode
 if(localStorage.getItem('darkMode')==='true'){
   document.body.classList.add('dark');
   darkModeBtn.textContent='☀️ Light Mode';
 }
-
 darkModeBtn.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
   const isDark=document.body.classList.contains('dark');
@@ -242,6 +221,7 @@ function colorForId(id){
 
 auth.onAuthStateChanged(user=>{ if(!user) auth.signInAnonymously(); else uid=user.uid; });
 
+// Presence (online users)
 function setupPresence(room){
   const conRef=db.ref('.info/connected');
   conRef.on('value',snap=>{
@@ -254,12 +234,14 @@ function setupPresence(room){
 
 function watchPresence(room){
   const pRef=db.ref('presence/'+room);
-  pRef.on('value',snap=>{
+  pRef.on('value', snap => {
     const val = snap.val()||{};
-    onlineCountEl.textContent=Object.keys(val).length;
+    const names = Object.values(val).map(x=>x.name).filter(Boolean);
+    onlineListEl.textContent = names.join(', ') || '0';
   });
 }
 
+// Typing
 function startTyping(){
   if(!uid) return;
   const tRef=db.ref('typing/'+roomName+'/'+uid);
@@ -269,21 +251,24 @@ function startTyping(){
 }
 
 function watchTyping(room){
-  const tRef=db.ref('typing/'+room);
-  tRef.on('value',snap=>{
-    const val=snap.val()||{};
-    const names=Object.values(val).map(x=>x.name).filter(Boolean);
-    if(names.length){ typingEl.style.display='block'; typingEl.textContent=names.join(', ')+ ' typing...'; }
-    else typingEl.style.display='none';
+  const tRef = db.ref('typing/' + room);
+  tRef.on('value', snap => {
+    const val = snap.val() || {};
+    const names = Object.values(val).map(x => x.name).filter(Boolean);
+    typingBar.textContent = names.length > 0 ? names.join(', ') + ' typing...' : '';
   });
 }
 
+// Messages
 function sendMessage(){
   const text=msgInput.value.trim();
   if(!text||!uid) return;
   const payload={name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
   const room=roomInput.value.trim()||'global';
-  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{msgInput.value=''; db.ref('typing/'+room+'/'+uid).remove();});
+  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
+    msgInput.value='';
+    db.ref('typing/'+room+'/'+uid).remove();
+  });
 }
 
 function listenRoom(room){
@@ -301,27 +286,32 @@ function listenRoom(room){
   });
 }
 
+// Events
 sendBtn.addEventListener('click',sendMessage);
-msgInput.addEventListener('keydown',e=>{ if(e.key==='Enter') sendMessage(); else startTyping(); });
-msgInput.addEventListener('input',startTyping);
+msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
+msgInput.addEventListener('input', startTyping);
 
-roomInput.addEventListener('change',()=>{
-  roomName=roomInput.value.trim()||'global';
-  roomNameEl.textContent=roomName;
-  localStorage.setItem('roomName',roomName);
+roomInput.addEventListener('change', ()=>{
+  roomName = roomInput.value.trim()||'global';
+  roomNameEl.textContent = roomName;
+  localStorage.setItem('roomName', roomName);
   setupPresence(roomName); listenRoom(roomName); watchPresence(roomName); watchTyping(roomName);
 });
 
-nameInput.addEventListener('change',()=>{
-  displayName=nameInput.value.trim()||'Anonymous';
-  displayNameEl.textContent=displayName;
-  localStorage.setItem('displayName',displayName);
+nameInput.addEventListener('change', ()=>{
+  displayName = nameInput.value.trim()||'Anonymous';
+  displayNameEl.textContent = displayName;
+  localStorage.setItem('displayName', displayName);
   if(uid) db.ref('presence/'+roomName+'/'+uid).update({name:displayName});
 });
 
-clearBtn.addEventListener('click',()=>messagesEl.innerHTML='');
+clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
 
-listenRoom(roomName); setupPresence(roomName); watchPresence(roomName); watchTyping(roomName);
+// Initialize
+listenRoom(roomName);
+setupPresence(roomName);
+watchPresence(roomName);
+watchTyping(roomName);
 </script>
 </body>
 </html>
