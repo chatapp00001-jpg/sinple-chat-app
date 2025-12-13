@@ -1,103 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-<link rel="icon" href="chat.png" type="image/png" />
+  <link rel="icon" href="chat.png" type="image/png" />
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Easy Chat</title>
-
 <style>
-body{
-  font-family: Inter, system-ui, Arial;
-  background:#f5f7fb;
-  margin:0;
-  padding:16px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-}
-body.dark{background:#121212;color:#e0e0e0}
-.app{
-  width:100%;
-  max-width:720px;
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 6px 30px rgba(0,0,0,.1);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-body.dark .app{background:#1e1e1e}
-header{padding:12px;border-bottom:1px solid #ddd}
-#messages{
-  height:55vh;
-  overflow:auto;
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.msg{
-  background:#eef6ff;
-  padding:8px 10px;
-  border-radius:8px;
-  max-width:75%;
-}
-.me{align-self:flex-end;background:#dff6e8}
-.reply-box{
-  background:#000;
-  color:#fff;
-  padding:4px 6px;
-  font-size:12px;
-  border-radius:6px;
-  margin-bottom:4px;
-}
-footer{
-  padding:12px;
-  border-top:1px solid #ddd;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-input,button{
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-button{
-  background:#2563eb;
-  color:#fff;
-  cursor:pointer;
-}
-button:disabled{background:#999}
-.online-list{font-size:12px;display:flex;gap:6px;flex-wrap:wrap}
-.avatar{
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  display:inline-block;
-}
+/* ... keep all your existing CSS as-is ... */
 </style>
 </head>
-
 <body>
 <div class="app">
-<header>
-  <strong>Easy Chat</strong><br>
-  Name: <span id="displayName">(not set)</span> |
-  Room: <span id="roomName">global</span>
-  <div class="online-list" id="onlineUsers"></div>
-</header>
+  <header>
+    <h1>Easy Chat</h1>
+    <div class="meta-bar">
+      <div class="small">Name: <strong id="displayName">(not set)</strong></div>
+      <div class="small">Room: <strong id="roomName">global</strong></div>
+      <div class="online-list" id="onlineUsers"></div>
+      <div class="typing" id="typingEl" style="display:none">is typing...</div>
+      <button id="darkModeBtn" style="margin-left:auto;padding:4px 68x;font-size:12px;">🌙 Dark Mode</button>
+    </div>
+  </header>
 
-<div id="messages"></div>
+  <div id="messages"></div>
 
-<footer>
-  <input id="nameInput" placeholder="Your name">
-  <input id="roomInput" placeholder="Room name">
-  <input id="msgInput" placeholder="Type a message">
-  <button id="sendBtn">Send</button>
-</footer>
+  <footer>
+    <div style="display:flex;gap:8px;flex:1;align-items:center">
+      <input id="nameInput" type="text" placeholder="Your display name" />
+      <input id="roomInput" type="text" placeholder="Room name (default: global)" />
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <input id="msgInput" type="text" placeholder="Type a message and press Enter" />
+      <div style="display:flex;gap:6px">
+        <button id="sendBtn">Send</button>
+        <button id="clearBtn" style="background:#ef4444">Clear</button>
+      </div>
+    </div>
+  </footer>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -112,144 +51,240 @@ const firebaseConfig = {
   projectId: "chat-2d825",
   storageBucket: "chat-2d825.appspot.com",
   messagingSenderId: "397345569962",
-  appId: "1:397345569962:web:bac031c0cf9a394820a4d3"
+  appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
+  measurementId: "G-YVDC4J0CM5"
 };
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.database();
 const auth = firebase.auth();
 
-const msgInput=document.getElementById('msgInput');
-const nameInput=document.getElementById('nameInput');
-const roomInput=document.getElementById('roomInput');
-const messagesEl=document.getElementById('messages');
-const displayNameEl=document.getElementById('displayName');
-const roomNameEl=document.getElementById('roomName');
-const sendBtn=document.getElementById('sendBtn');
-const onlineUsersEl=document.getElementById('onlineUsers');
+const msgInput = document.getElementById('msgInput');
+const nameInput = document.getElementById('nameInput');
+const roomInput = document.getElementById('roomInput');
+const messagesEl = document.getElementById('messages');
+const displayNameEl = document.getElementById('displayName');
+const roomNameEl = document.getElementById('roomName');
+const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+const typingEl = document.getElementById('typingEl');
+const onlineUsersEl = document.getElementById('onlineUsers');
+const darkModeBtn = document.getElementById('darkModeBtn');
 
-let uid=null;
-let displayName=localStorage.getItem('displayName')||'';
-let roomName=localStorage.getItem('roomName')||'global';
+let displayName = localStorage.getItem('displayName') || '';
+let roomName = localStorage.getItem('roomName') || 'global';
+let uid = null;
+let typingTimeout = null;
+let replyTo = null;
+let editMsgKey = null;
 
-let nameAllowed=true;
-let nameRef=null;
+nameInput.value = displayName;
+roomInput.value = roomName;
+displayNameEl.textContent = displayName || '(not set)';
+roomNameEl.textContent = roomName;
 
-nameInput.value=displayName;
-roomInput.value=roomName;
-displayNameEl.textContent=displayName||'(not set)';
-roomNameEl.textContent=roomName;
-
-auth.onAuthStateChanged(u=>{
-  if(!u) auth.signInAnonymously();
-  else uid=u.uid;
+if(localStorage.getItem('darkMode')==='true'){
+  document.body.classList.add('dark');
+  darkModeBtn.textContent='☀️ Light Mode';
+}
+darkModeBtn.addEventListener('click', ()=>{
+  document.body.classList.toggle('dark');
+  const isDark=document.body.classList.contains('dark');
+  localStorage.setItem('darkMode', isDark);
+  darkModeBtn.textContent=isDark?'☀️ Light Mode':'🌙 Dark Mode';
 });
 
 function colorForId(id){
-  const c=['#ef4444','#3b82f6','#10b981','#8b5cf6'];
-  let h=0;for(let i=0;i<id.length;i++)h=id.charCodeAt(i)+((h<<5)-h);
-  return c[Math.abs(h)%c.length];
+  const colors=['#f97316','#ef4444','#06b6d4','#8b5cf6','#10b981','#3b82f6','#ef9a7a','#f43f5e'];
+  let h=0; for(let i=0;i<id.length;i++) h=(h<<5)-h+id.charCodeAt(i);
+  return colors[Math.abs(h)%colors.length];
 }
 
-/* 🔑 UNIQUE NAME CHECK */
-function checkUniqueName(room,name){
-  if(!uid||!name)return;
-  if(nameRef)nameRef.off();
+auth.onAuthStateChanged(user=>{ if(!user) auth.signInAnonymously(); else uid=user.uid; });
 
-  nameRef=db.ref(`roomNames/${room}/${name}`);
-  nameRef.on('value',snap=>{
-    if(!snap.exists() || snap.val()===uid){
-      nameAllowed=true;
-      msgInput.disabled=false;
-      sendBtn.disabled=false;
-      msgInput.placeholder="Type a message";
-    }else{
-      nameAllowed=false;
-      msgInput.disabled=true;
-      sendBtn.disabled=true;
-      msgInput.placeholder="⚠ Name already used. Change name.";
-    }
+function setupPresence(room){
+  const conRef=db.ref('.info/connected');
+  conRef.on('value',snap=>{
+    if(!snap.val()) return;
+    const pRef=db.ref('presence/'+room+'/'+uid);
+    pRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
+    pRef.onDisconnect().remove();
   });
 }
 
-/* NAME CHANGE */
-nameInput.addEventListener('change',()=>{
-  const n=nameInput.value.trim();
-  if(!n||!uid)return;
-
-  displayName=n;
-  displayNameEl.textContent=n;
-  localStorage.setItem('displayName',n);
-
-  checkUniqueName(roomName,n);
-
-  db.ref(`roomNames/${roomName}/${n}`).transaction(cur=>{
-    if(cur===null||cur===uid)return uid;
-  });
-
-  db.ref(`presence/${roomName}/${uid}`).set({name:n});
-});
-
-/* ROOM CHANGE */
-roomInput.addEventListener('change',()=>{
-  roomName=roomInput.value.trim()||'global';
-  roomNameEl.textContent=roomName;
-  localStorage.setItem('roomName',roomName);
-  listenRoom(roomName);
-  watchPresence(roomName);
-  if(displayName)checkUniqueName(roomName,displayName);
-});
-
-/* SEND MESSAGE */
-function sendMessage(){
-  if(!nameAllowed){
-    alert("Name already used in this room");
-    return;
-  }
-  const text=msgInput.value.trim();
-  if(!text||!uid)return;
-  db.ref(`rooms/${roomName}/messages`).push({
-    name:displayName||'Anonymous',
-    text,uid,ts:Date.now()
-  });
-  msgInput.value='';
-}
-
-sendBtn.onclick=sendMessage;
-msgInput.onkeydown=e=>{if(e.key==="Enter")sendMessage();};
-
-/* MESSAGES */
-function listenRoom(room){
-  messagesEl.innerHTML='';
-  db.ref(`rooms/${room}/messages`).limitToLast(100)
-  .on('child_added',snap=>{
-    const m=snap.val();
-    const div=document.createElement('div');
-    div.className='msg'+(m.uid===uid?' me':'');
-    div.innerHTML=`<b>${m.name}</b><br>${m.text}`;
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop=messagesEl.scrollHeight;
-  });
-}
-
-/* ONLINE USERS */
 function watchPresence(room){
-  db.ref(`presence/${room}`).on('value',snap=>{
-    onlineUsersEl.innerHTML='';
-    Object.values(snap.val()||{}).forEach(u=>{
-      const d=document.createElement('div');
-      const a=document.createElement('span');
-      a.className='avatar';
-      a.style.background=colorForId(u.name);
-      d.appendChild(a);
-      d.appendChild(document.createTextNode(u.name));
-      onlineUsersEl.appendChild(d);
+  const pRef=db.ref('presence/'+room);
+  pRef.on('value',snap=>{
+    const val = snap.val()||{};
+    onlineUsersEl.innerHTML = '';
+    Object.values(val).forEach(user=>{
+      const div = document.createElement('div');
+      div.className = 'online-user';
+      const avatar = document.createElement('span');
+      avatar.className='avatar';
+      avatar.style.background=colorForId(user.name);
+      div.appendChild(avatar);
+      const name = document.createElement('span');
+      name.textContent = user.name;
+      div.appendChild(name);
+      onlineUsersEl.appendChild(div);
     });
   });
 }
 
-listenRoom(roomName);
-watchPresence(roomName);
+function startTyping(){
+  if(!uid) return;
+  const tRef=db.ref('typing/'+roomName+'/'+uid);
+  tRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
+  if(typingTimeout) clearTimeout(typingTimeout);
+  typingTimeout=setTimeout(()=>tRef.remove(),1500);
+}
+
+function watchTyping(room){
+  const tRef=db.ref('typing/'+room);
+  tRef.on('value',snap=>{
+    const val=snap.val()||{};
+    const names=Object.values(val).map(x=>x.name).filter(Boolean);
+    typingEl.style.display = names.length ? 'block' : 'none';
+    typingEl.textContent = names.length ? names.join(', ') + ' typing...' : '';
+  });
+}
+
+// --- UNIQUE NAME PER ROOM ---
+async function checkUniqueName(name, room) {
+  if (!name) return false;
+  const snap = await db.ref('roomNames/' + room + '/' + name).get();
+  return !snap.exists();
+}
+
+// --- SEND MESSAGE WITH UNIQUE NAME ---
+async function sendMessage(){
+  const text = msgInput.value.trim();
+  if(!text || !uid) return;
+  const room = roomInput.value.trim()||'global';
+  const name = nameInput.value.trim() || 'Anonymous';
+
+  // Check unique name if new message
+  if(!editMsgKey){
+    const available = await checkUniqueName(name, room);
+    if(!available){
+      alert("This name is already taken in this room! Change your name first.");
+      return;
+    }
+  }
+
+  if(editMsgKey){
+    db.ref('rooms/'+room+'/messages/'+editMsgKey).update({text});
+    editMsgKey = null;
+    msgInput.value='';
+    return;
+  }
+
+  const payload = {name, text, ts:Date.now(), uid};
+  if(replyTo) payload.reply = replyTo;
+  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
+    msgInput.value='';
+    db.ref('typing/'+room+'/'+uid).remove();
+    replyTo = null;
+
+    // mark name as taken
+    db.ref('roomNames/'+room+'/'+name).set(true);
+  });
+}
+
+// --- LISTEN ROOM ---
+function renderMessage(snap, update=false, room){
+  const m = snap.val(); 
+  m.key = snap.key;
+  const isMe = (m.uid && uid && m.uid===uid) || (m.name===displayName);
+
+  let el = messagesEl.querySelector(`[data-key="${m.key}"]`);
+  if(!el){
+    el = document.createElement('div'); 
+    el.setAttribute('data-key', m.key); 
+    el.className = 'msg'+(isMe?' me':'');
+    messagesEl.appendChild(el);
+  }
+
+  const color = colorForId(String(m.uid || m.name || ''));
+  el.innerHTML = `
+    ${m.reply ? `<div class="reply-box"><strong>${m.reply.name}</strong>: ${m.reply.text}</div>` : ''}
+    <div class="meta"><span class="avatar" style="background:${color}"></span><strong>${m.name||'Anonymous'}</strong> · ${new Date(m.ts).toLocaleTimeString()}</div>
+    <div class="msg-text">${m.text}</div>
+    <div style="margin-top:4px;">
+      <button class="delete-btn" data-type="me">Delete for me</button>
+      ${isMe ? `<button class="delete-btn" data-type="all">Delete for everyone</button>` : ''}
+      ${isMe ? `<button class="edit-btn">Edit</button>` : ''}
+    </div>
+  `;
+
+  el.querySelector('[data-type="me"]').addEventListener('click',()=>messagesEl.removeChild(el));
+
+  if(isMe){
+    const btnAll = el.querySelector('[data-type="all"]');
+    if(btnAll) btnAll.addEventListener('click', ()=>{ db.ref('rooms/'+room+'/messages/'+m.key).remove(); });
+    const btnEdit = el.querySelector('.edit-btn');
+    if(btnEdit) btnEdit.addEventListener('click', ()=>{
+      msgInput.value = m.text;
+      msgInput.focus();
+      editMsgKey = m.key;
+    });
+  }
+
+  el.addEventListener('click', ()=>{
+    replyTo = {name:m.name||'Anonymous', text:m.text};
+    msgInput.focus();
+  });
+
+  if(!update) messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function listenRoom(room){
+  messagesEl.innerHTML='';
+  const ref=db.ref('rooms/'+room+'/messages').limitToLast(200);
+  ref.on('child_added', snap => renderMessage(snap, false, room));
+  ref.on('child_changed', snap => renderMessage(snap, true, room));
+  ref.on('child_removed', snap=>{
+    const msgEl = messagesEl.querySelector(`[data-key="${snap.key}"]`);
+    if(msgEl) messagesEl.removeChild(msgEl);
+  });
+}
+
+// --- EVENTS ---
+sendBtn.addEventListener('click', sendMessage);
+msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
+msgInput.addEventListener('input', startTyping);
+
+roomInput.addEventListener('change', ()=>{
+  roomName = roomInput.value.trim()||'global';
+  roomNameEl.textContent = roomName;
+  localStorage.setItem('roomName', roomName);
+  setupPresence(roomName); listenRoom(roomName); watchPresence(roomName); watchTyping(roomName);
+});
+
+nameInput.addEventListener('change', async ()=>{
+  const oldName = displayName;
+  const newName = nameInput.value.trim()||'Anonymous';
+  const room = roomInput.value.trim()||'global';
+
+  const available = await checkUniqueName(newName, room);
+  if(!available){
+    alert("This name is already taken in this room! Choose another.");
+    nameInput.value = oldName;
+    return;
+  }
+
+  displayName = newName;
+  displayNameEl.textContent = displayName;
+  localStorage.setItem('displayName', displayName);
+  if(uid) db.ref('presence/'+room+'/'+uid).update({name:displayName});
+
+  if(oldName) db.ref('roomNames/'+room+'/'+oldName).remove();
+  db.ref('roomNames/'+room+'/'+newName).set(true);
+});
+
+clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
+
+listenRoom(roomName); setupPresence(roomName); watchPresence(roomName); watchTyping(roomName);
 </script>
 </body>
 </html>
