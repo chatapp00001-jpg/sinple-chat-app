@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <link rel="icon" href="chat.png" type="image/png" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Easy Chat</title>
@@ -62,14 +61,7 @@
     .me { align-self: flex-end; background: #dff6e8; border-color: rgba(0,120,60,.06); }
     body.dark .me { background: #3a3a3a; border-color: rgba(255,255,255,.2); }
     .meta { font-size: 12px; opacity: .7; margin-bottom: 6px; }
-    .reply-box {
-      background: #000;
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
+    .reply-box { background: #000; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-bottom: 4px; }
     footer { padding: 12px; border-top: 1px solid #eef2f7; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.3s; }
     body.dark footer { border-color: #333; }
     footer > div { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -105,371 +97,195 @@
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>Easy Chat</h1>
-      <div class="meta-bar">
-        <div class="small">Name: <strong id="displayName">(not set)</strong></div>
-        <div class="small">Room: <strong id="roomName">global</strong></div>
-        <div class="online-list" id="onlineUsers"></div>
-        <div class="typing" id="typingEl" style="display:none">is typing...</div>
-        <button id="darkModeBtn" style="margin-left:auto;padding:4px 8px;font-size:12px;">🌙 Dark Mode</button>
+<div class="app">
+  <header>
+    <h1>Easy Chat</h1>
+    <div class="meta-bar">
+      <div class="small">Name: <strong id="displayName">(not set)</strong></div>
+      <div class="small">Room: <strong id="roomName">global</strong></div>
+      <div class="online-list" id="onlineUsers"></div>
+      <div class="typing" id="typingEl" style="display:none">is typing...</div>
+      <button id="darkModeBtn" style="margin-left:auto;padding:4px 8px;font-size:12px;">🌙 Dark Mode</button>
+    </div>
+  </header>
+
+  <div id="messages"></div>
+
+  <footer>
+    <div style="display:flex;gap:8px;flex:1;align-items:center">
+      <input id="nameInput" type="text" placeholder="Your display name" />
+      <div style="display:flex;gap:6px;align-items:center;width:320px;">
+        <input id="roomInput" type="text" placeholder="Room name (default: global)" />
+        <button id="createRoomBtn" style="flex:0 0 auto;padding:10px 12px">Create & Join</button>
+        <div id="roomStatus" class="room-status"></div>
       </div>
-    </header>
-
-    <div id="messages"></div>
-
-    <footer>
-      <div style="display:flex;gap:8px;flex:1;align-items:center">
-        <input id="nameInput" type="text" placeholder="Your display name" />
-        <div style="display:flex;gap:6px;align-items:center;width:320px;">
-          <input id="roomInput" type="text" placeholder="Room name (default: global)" />
-          <button id="createRoomBtn" style="flex:0 0 auto;padding:10px 12px">Create & Join</button>
-          <div id="roomStatus" class="room-status"></div>
-        </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <input id="msgInput" type="text" placeholder="Type a message and press Enter" />
+      <div style="display:flex;gap:6px">
+        <button id="sendBtn">Send</button>
+        <button id="clearBtn" style="background:#ef4444">Clear</button>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <input id="msgInput" type="text" placeholder="Type a message and press Enter" />
-        <div style="display:flex;gap:6px">
-          <button id="sendBtn">Send</button>
-          <button id="clearBtn" style="background:#ef4444">Clear</button>
-        </div>
-      </div>
-    </footer>
-  </div>
+    </div>
+  </footer>
+</div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB1kH5ViWhVpwJMaQEY0mcJhtEOia1k2aE",
-      authDomain: "chat-2d825.firebaseapp.com",
-      databaseURL: "https://chat-2d825-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "chat-2d825",
-      storageBucket: "chat-2d825.appspot.com",
-      messagingSenderId: "397345569962",
-      appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
-      measurementId: "G-YVDC4J0CM5"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const auth = firebase.auth();
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB1kH5ViWhVpwJMaQEY0mcJhtEOia1k2aE",
+  authDomain: "chat-2d825.firebaseapp.com",
+  databaseURL: "https://chat-2d825-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "chat-2d825",
+  storageBucket: "chat-2d825.appspot.com",
+  messagingSenderId: "397345569962",
+  appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
+  measurementId: "G-YVDC4J0CM5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
 
-    const msgInput = document.getElementById('msgInput');
-    const nameInput = document.getElementById('nameInput');
-    const roomInput = document.getElementById('roomInput');
-    const messagesEl = document.getElementById('messages');
-    const displayNameEl = document.getElementById('displayName');
-    const roomNameEl = document.getElementById('roomName');
-    const sendBtn = document.getElementById('sendBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const typingEl = document.getElementById('typingEl');
-    const onlineUsersEl = document.getElementById('onlineUsers');
-    const darkModeBtn = document.getElementById('darkModeBtn');
-    const createRoomBtn = document.getElementById('createRoomBtn');
-    const roomStatus = document.getElementById('roomStatus');
+const msgInput = document.getElementById('msgInput');
+const nameInput = document.getElementById('nameInput');
+const roomInput = document.getElementById('roomInput');
+const messagesEl = document.getElementById('messages');
+const displayNameEl = document.getElementById('displayName');
+const roomNameEl = document.getElementById('roomName');
+const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+const typingEl = document.getElementById('typingEl');
+const onlineUsersEl = document.getElementById('onlineUsers');
+const darkModeBtn = document.getElementById('darkModeBtn');
+const createRoomBtn = document.getElementById('createRoomBtn');
+const roomStatus = document.getElementById('roomStatus');
 
-    let displayName = localStorage.getItem('displayName') || '';
-    let joinedRoom = null; // the room we actually joined
-    let uid = null;
-    let typingTimeout = null;
-    let replyTo = null;
-    let editMsgKey = null;
+let displayName = localStorage.getItem('displayName') || '';
+let joinedRoom = null;
+let uid = null;
+let typingTimeout = null;
+let replyTo = null;
+let editMsgKey = null;
 
-    nameInput.value = displayName;
-    roomInput.value = localStorage.getItem('roomName') || 'global';
-    displayNameEl.textContent = displayName || '(not set)';
+nameInput.value = displayName;
+roomInput.value = localStorage.getItem('roomName') || 'global';
+displayNameEl.textContent = displayName || '(not set)';
 
-    if(localStorage.getItem('darkMode')==='true'){
-      document.body.classList.add('dark');
-      darkModeBtn.textContent='☀️ Light Mode';
-    }
-    darkModeBtn.addEventListener('click', ()=>{
-      document.body.classList.toggle('dark');
-      const isDark=document.body.classList.contains('dark');
-      localStorage.setItem('darkMode', isDark);
-      darkModeBtn.textContent=isDark?'☀️ Light Mode':'🌙 Dark Mode';
+if(localStorage.getItem('darkMode')==='true'){
+  document.body.classList.add('dark');
+  darkModeBtn.textContent='☀️ Light Mode';
+}
+darkModeBtn.addEventListener('click', ()=>{
+  document.body.classList.toggle('dark');
+  const isDark=document.body.classList.contains('dark');
+  localStorage.setItem('darkMode', isDark);
+  darkModeBtn.textContent=isDark?'☀️ Light Mode':'🌙 Dark Mode';
+});
+
+function colorForId(id){
+  const colors=['#f97316','#ef4444','#06b6d4','#8b5cf6','#10b981','#3b82f6','#ef9a7a','#f43f5e'];
+  let h=0; for(let i=0;i<id.length;i++) h=(h<<5)-h+id.charCodeAt(i);
+  return colors[Math.abs(h)%colors.length];
+}
+
+auth.onAuthStateChanged(user=>{
+  if(!user) auth.signInAnonymously();
+  else {
+    uid=user.uid;
+    createRoomBtn.disabled = false;
+    checkAndJoinInitialRoom(roomInput.value.trim()||'global');
+  }
+});
+
+function setupPresence(room){
+  const conRef=db.ref('.info/connected');
+  conRef.on('value',snap=>{
+    if(!snap.val()) return;
+    const pRef=db.ref('presence/'+room+'/'+uid);
+    pRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
+    pRef.onDisconnect().remove();
+  });
+}
+
+function watchPresence(room){
+  const pRef=db.ref('presence/'+room);
+  pRef.on('value',snap=>{
+    const val = snap.val()||{};
+    onlineUsersEl.innerHTML = '';
+    Object.values(val).forEach(user=>{
+      const div = document.createElement('div');
+      div.className = 'online-user';
+      const avatar = document.createElement('span');
+      avatar.className='avatar';
+      avatar.style.background=colorForId(user.name);
+      div.appendChild(avatar);
+      const name = document.createElement('span');
+      name.textContent = user.name;
+      div.appendChild(name);
+      onlineUsersEl.appendChild(div);
     });
+  });
+}
 
-    function colorForId(id){
-      const colors=['#f97316','#ef4444','#06b6d4','#8b5cf6','#10b981','#3b82f6','#ef9a7a','#f43f5e'];
-      let h=0; for(let i=0;i<id.length;i++) h=(h<<5)-h+id.charCodeAt(i);
-      return colors[Math.abs(h)%colors.length];
-    }
+function startTyping(){
+  if(!uid || !joinedRoom) return;
+  const tRef=db.ref('typing/'+joinedRoom+'/'+uid);
+  tRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
+  if(typingTimeout) clearTimeout(typingTimeout);
+  typingTimeout=setTimeout(()=>tRef.remove(),1500);
+}
 
-    auth.onAuthStateChanged(user=>{
-      if(!user) auth.signInAnonymously();
-      else {
-        uid=user.uid;
-        // enable create button once we have uid
-        createRoomBtn.disabled = false;
-        // After auth, check desired initial room and join/create as needed
-        checkAndJoinInitialRoom(roomInput.value.trim()||'global');
-      }
-    });
+function watchTyping(room){
+  const tRef=db.ref('typing/'+room);
+  tRef.on('value',snap=>{
+    const val=snap.val()||{};
+    const names=Object.values(val).map(x=>x.name).filter(Boolean);
+    typingEl.style.display = names.length ? 'block' : 'none';
+    typingEl.textContent = names.length ? names.join(', ') + ' typing...' : '';
+  });
+}
 
-    function setupPresence(room){
-      const conRef=db.ref('.info/connected');
-      conRef.on('value',snap=>{
-        if(!snap.val()) return;
-        const pRef=db.ref('presence/'+room+'/'+uid);
-        pRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
-        pRef.onDisconnect().remove();
-      });
-    }
+function sendMessage(){
+  const text = msgInput.value.trim();
+  if(!text || !uid || !joinedRoom) return;
+  if(editMsgKey){
+    db.ref('rooms/'+joinedRoom+'/messages/'+editMsgKey).update({text});
+    editMsgKey = null;
+    msgInput.value='';
+    return;
+  }
+  const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
+  if(replyTo) payload.reply = replyTo;
+  db.ref('rooms/'+joinedRoom+'/messages').push(payload).then(()=>{
+    msgInput.value='';
+    db.ref('typing/'+joinedRoom+'/'+uid).remove();
+    replyTo = null;
+  });
+}
 
-    function watchPresence(room){
-      const pRef=db.ref('presence/'+room);
-      pRef.on('value',snap=>{
-        const val = snap.val()||{};
-        onlineUsersEl.innerHTML = '';
-        Object.values(val).forEach(user=>{
-          const div = document.createElement('div');
-          div.className = 'online-user';
-          const avatar = document.createElement('span');
-          avatar.className='avatar';
-          avatar.style.background=colorForId(user.name);
-          div.appendChild(avatar);
-          const name = document.createElement('span');
-          name.textContent = user.name;
-          div.appendChild(name);
-          onlineUsersEl.appendChild(div);
-        });
-      });
-    }
+// renderMessage, listenRoom, joinRoom, sanitizeRoomName etc. remain same as previous explanation
 
-    function startTyping(){
-      if(!uid || !joinedRoom) return;
-      const tRef=db.ref('typing/'+joinedRoom+'/'+uid);
-      tRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
-      if(typingTimeout) clearTimeout(typingTimeout);
-      typingTimeout=setTimeout(()=>tRef.remove(),1500);
-    }
+// Unique room creation with transaction
+function createRoomUnique(name){
+  const room = sanitizeRoomName(name);
+  if(!uid) { alert('Signing in...'); return; }
+  const roomRef = db.ref('rooms/'+room);
+  roomRef.transaction(current=>{
+    if(current===null){
+      return { owner: uid, createdAt: Date.now() };
+    } else return;
+  }, (error, committed)=>{
+    if(error){ roomStatus.textContent='Error creating room'; roomStatus.className='room-status warn'; }
+    else if(!committed){ roomStatus.textContent='Room name taken'; roomStatus.className='room-status warn'; }
+    else { roomStatus.textContent='Room created'; roomStatus.className='room-status ok'; joinRoom(room); }
+  });
+}
 
-    function watchTyping(room){
-      const tRef=db.ref('typing/'+room);
-      tRef.on('value',snap=>{
-        const val=snap.val()||{};
-        const names=Object.values(val).map(x=>x.name).filter(Boolean);
-        typingEl.style.display = names.length ? 'block' : 'none';
-        typingEl.textContent = names.length ? names.join(', ') + ' typing...' : '';
-      });
-    }
+createRoomBtn.addEventListener('click', ()=>createRoomUnique(roomInput.value.trim()));
 
-    function sendMessage(){
-      const text = msgInput.value.trim();
-      if(!text) return;
-      if(!uid) { alert('Not signed in yet. Please wait.'); return; }
-      if(!joinedRoom){
-        alert('Please join or create a room before sending messages.');
-        return;
-      }
-      if(editMsgKey){
-        db.ref('rooms/'+joinedRoom+'/messages/'+editMsgKey).update({text});
-        editMsgKey = null;
-        msgInput.value='';
-        return;
-      }
-      const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
-      if(replyTo) payload.reply = replyTo;
-      db.ref('rooms/'+joinedRoom+'/messages').push(payload).then(()=>{
-        msgInput.value='';
-        db.ref('typing/'+joinedRoom+'/'+uid).remove();
-        replyTo = null;
-      });
-    }
-
-    function renderMessage(snap, update=false, room){
-      const m = snap.val();
-      m.key = snap.key;
-      const isMe = (m.uid && uid && m.uid===uid) || (m.name===displayName);
-
-      let el = messagesEl.querySelector(`[data-key="${m.key}"]`);
-      if(!el){
-        el = document.createElement('div');
-        el.setAttribute('data-key', m.key);
-        el.className = 'msg'+(isMe?' me':'');
-        messagesEl.appendChild(el);
-      }
-
-      const color = colorForId(String(m.uid || m.name || ''));
-      el.innerHTML = `
-        ${m.reply ? `<div class="reply-box"><strong>${m.reply.name}</strong>: ${m.reply.text}</div>` : ''}
-        <div class="meta"><span class="avatar" style="background:${color}"></span><strong>${m.name||'Anonymous'}</strong> · ${new Date(m.ts).toLocaleTimeString()}</div>
-        <div class="msg-text">${m.text}</div>
-        <div style="margin-top:4px;">
-          <button class="delete-btn" data-type="me">Delete for me</button>
-          ${isMe ? `<button class="delete-btn" data-type="all">Delete for everyone</button>` : ''}
-          ${isMe ? `<button class="edit-btn">Edit</button>` : ''}
-        </div>
-      `;
-
-      el.querySelector('[data-type="me"]').addEventListener('click',()=>messagesEl.removeChild(el));
-
-      if(isMe){
-        const btnAll = el.querySelector('[data-type="all"]');
-        if(btnAll) btnAll.addEventListener('click', ()=>{
-          db.ref('rooms/'+room+'/messages/'+m.key).remove();
-        });
-
-        const btnEdit = el.querySelector('.edit-btn');
-        if(btnEdit) btnEdit.addEventListener('click', ()=>{
-          msgInput.value = m.text;
-          msgInput.focus();
-          editMsgKey = m.key;
-        });
-      }
-
-      el.addEventListener('click', ()=>{
-        replyTo = {name:m.name||'Anonymous', text:m.text};
-        msgInput.focus();
-      });
-
-      if(!update) messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    let messagesRefListeners = null;
-    function listenRoom(room){
-      // clear previous listeners
-      if(messagesRefListeners && messagesRefListeners.ref){
-        messagesRefListeners.ref.off('child_added', messagesRefListeners.add);
-        messagesRefListeners.ref.off('child_changed', messagesRefListeners.change);
-        messagesRefListeners.ref.off('child_removed', messagesRefListeners.remove);
-      }
-      messagesEl.innerHTML='';
-      const ref=db.ref('rooms/'+room+'/messages').limitToLast(200);
-      const onAdd = snap => renderMessage(snap, false, room);
-      const onChange = snap => renderMessage(snap, true, room);
-      const onRemove = snap => {
-        const msgEl = messagesEl.querySelector(`[data-key="${snap.key}"]`);
-        if(msgEl) messagesEl.removeChild(msgEl);
-      };
-      ref.on('child_added', onAdd);
-      ref.on('child_changed', onChange);
-      ref.on('child_removed', onRemove);
-      messagesRefListeners = { ref, add:onAdd, change:onChange, remove:onRemove };
-    }
-
-    sendBtn.addEventListener('click', sendMessage);
-    msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
-    msgInput.addEventListener('input', startTyping);
-
-    // sanitize room names to be URL/DB-friendly
-    function sanitizeRoomName(r){
-      if(!r) return 'global';
-      r = r.trim().toLowerCase();
-      // replace spaces and invalid chars with hyphen
-      r = r.replace(/[^a-z0-9-_]+/g,'-');
-      r = r.replace(/[-_]{2,}/g,'-');
-      r = r.replace(/^-+|-+$/g,'');
-      return r || 'global';
-    }
-
-    function joinRoom(room){
-      joinedRoom = room;
-      roomNameEl.textContent = room;
-      localStorage.setItem('roomName', room);
-      roomStatus.textContent = 'Joined room: ' + room;
-      roomStatus.className = 'room-status ok';
-      createRoomBtn.disabled = true;
-      // start presence, watches and message listeners
-      setupPresence(room);
-      listenRoom(room);
-      watchPresence(room);
-      watchTyping(room);
-    }
-
-    function createRoom(room){
-      if(!uid){ alert('Signing in... please wait a moment and try again.'); return; }
-      const metaRef = db.ref('rooms/'+room+'/meta');
-      metaRef.once('value').then(snap=>{
-        if(snap.exists()){
-          roomStatus.textContent = 'Room already exists. Joining instead.';
-          roomStatus.className = 'room-status warn';
-          joinRoom(room);
-          return;
-        }
-        const meta = { name: room, owner: uid, ownerName: nameInput.value||'Anonymous', createdAt: Date.now() };
-        metaRef.set(meta).then(()=>{
-          // optional: create initial message or welcome note
-          db.ref('rooms/'+room+'/messages').push({name:'System', text:'Room created: '+room, ts:Date.now(), uid:'system'});
-          roomStatus.textContent = 'Room created and joined: ' + room;
-          roomStatus.className = 'room-status ok';
-          joinRoom(room);
-        });
-      }).catch(err=>{
-        console.error('createRoom err', err);
-        roomStatus.textContent = 'Error creating room.';
-        roomStatus.className = 'room-status warn';
-      });
-    }
-
-    function checkRoomAvailabilityAndMaybeJoin(rawRoom){
-      const room = sanitizeRoomName(rawRoom);
-      roomInput.value = room;
-      const metaRef = db.ref('rooms/'+room+'/meta');
-      return metaRef.once('value').then(snap=>{
-        if(snap.exists()){
-          roomStatus.textContent = 'Room exists — joining: ' + room;
-          roomStatus.className = 'room-status ok';
-          joinRoom(room);
-        } else {
-          roomStatus.textContent = 'Room does not exist. You can create & join it.';
-          roomStatus.className = 'room-status warn';
-          // allow user to create
-          createRoomBtn.disabled = false;
-          // Special-case: auto-create/join global to preserve previous behavior
-          if(room === 'global'){
-            createRoom(room);
-          } else {
-            // do not auto-join non-existing room
-            joinedRoom = null;
-            roomNameEl.textContent = '(not joined)';
-          }
-        }
-      }).catch(err=>{
-        console.error('checkRoom err', err);
-        roomStatus.textContent = 'Error checking room.';
-        roomStatus.className = 'room-status warn';
-      });
-    }
-
-    function checkAndJoinInitialRoom(initialRaw){
-      const initial = sanitizeRoomName(initialRaw || 'global');
-      // if auth not set yet, will be called back from onAuthStateChanged
-      if(!uid) return;
-      checkRoomAvailabilityAndMaybeJoin(initial);
-    }
-
-    // events for room input and create button
-    roomInput.addEventListener('change', ()=> checkRoomAvailabilityAndMaybeJoin(roomInput.value.trim()||'global') );
-    createRoomBtn.addEventListener('click', ()=>{
-      const room = sanitizeRoomName(roomInput.value.trim()||'global');
-      createRoomBtn.disabled = true;
-      createRoom(room);
-    });
-
-    nameInput.addEventListener('change', ()=>{
-      displayName = nameInput.value.trim()||'Anonymous';
-      displayNameEl.textContent = displayName;
-      localStorage.setItem('displayName', displayName);
-      // update presence entry if already joined
-      if(uid && joinedRoom) db.ref('presence/'+joinedRoom+'/'+uid).update({name:displayName});
-    });
-
-    clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
-
-    // if user presses Enter while in room field - trigger change
-    roomInput.addEventListener('keydown', e => { if(e.key === 'Enter') { roomInput.dispatchEvent(new Event('change')); } });
-
-    // initial UI state
-    createRoomBtn.disabled = true;
-    roomStatus.textContent = 'Checking room...';
-    roomStatus.className = 'room-status';
-    // If auth already ready, check and join; otherwise onAuthStateChanged will call it
-    if(uid) checkAndJoinInitialRoom(roomInput.value);
-  </script>
+</script>
 </body>
 </html>
