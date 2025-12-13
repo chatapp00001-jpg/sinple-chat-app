@@ -1,134 +1,115 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <link rel="icon" href="chat.png" type="image/png" />
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Easy Chat</title>
+
 <style>
-body {
+body{
   font-family: Inter, system-ui, Arial;
-  background: #f5f7fb;
-  margin: 0;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  transition: background 0.3s, color 0.3s;
+  background:#f5f7fb;
+  margin:0;
+  padding:16px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
 }
-body.dark { background: #121212; color: #e0e0e0; }
-.app {
-  width: 100%;
-  max-width: 720px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 6px 30px rgba(20,30,60,.08);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  margin: 0 8px;
-  transition: background 0.3s, box-shadow 0.3s;
+.app{
+  width:100%;
+  max-width:720px;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 6px 30px rgba(0,0,0,.08);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
-body.dark .app { background: #1e1e1e; box-shadow: 0 6px 30px rgba(0,0,0,.5); }
-header { padding: 12px 16px; border-bottom: 1px solid #eef2f7; display: flex; flex-direction: column; gap: 8px; transition: color 0.3s; }
-body.dark header { border-color: #333; color: #e0e0e0; }
-header h1 { font-size: 16px; margin: 0; }
-.meta-bar { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; text-align: left; align-items:center; }
-#messages {
-  height: 55vh;
-  overflow: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: linear-gradient(180deg,#f9fbff,#fff);
-  transition: background 0.3s;
+header{
+  padding:12px 16px;
+  border-bottom:1px solid #e5e7eb;
 }
-body.dark #messages { background: linear-gradient(180deg,#2a2a2a,#1e1e1e); }
-.msg {
-  max-width: 75%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #eef6ff;
-  border: 1px solid rgba(0,60,120,.04);
-  box-shadow: 0 1px 0 rgba(0,0,0,.02);
-  word-wrap: break-word;
-  transition: background 0.3s, border-color 0.3s, color 0.3s;
-  position: relative;
-  cursor: pointer;
+.meta-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  font-size:12px;
 }
-body.dark .msg { background: #2a2a2a; border-color: rgba(255,255,255,.1); color: #e0e0e0; }
-.me { align-self: flex-end; background: #dff6e8; border-color: rgba(0,120,60,.06); }
-body.dark .me { background: #3a3a3a; border-color: rgba(255,255,255,.2); }
-.meta { font-size: 12px; opacity: .7; margin-bottom: 6px; }
-.reply-box {
-  background: #000;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  margin-bottom: 4px;
+#messages{
+  height:60vh;
+  overflow:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
-footer { padding: 12px; border-top: 1px solid #eef2f7; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.3s; }
-body.dark footer { border-color: #333; }
-footer > div { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-input[type=text], button {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #e6edf6;
-  min-width: 100px;
-  transition: background 0.3s, color 0.3s, border-color 0.3s;
+.msg{
+  max-width:75%;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#eef6ff;
 }
-body.dark input[type=text], body.dark button { background: #2a2a2a; color: #e0e0e0; border-color: rgba(255,255,255,.2); }
-button { background: #2563eb; color: #fff; cursor: pointer; }
-.small { font-size: 12px; color: #6b7280; }
-body.dark .small { color: #c0c0c0; }
-.typing { font-size: 13px; color: #475569; padding: 8px 12px; }
-body.dark .typing { color: #aaa; }
-.online-list { font-size: 12px; color: #374151; display:flex; gap:6px; flex-wrap:wrap; }
-body.dark .online-list { color: #c0c0c0; }
-.online-user { display:flex; align-items:center; gap:4px; margin-right:8px; }
-.online-user .avatar { width:20px; height:20px; }
-.avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; }
-@media (max-width:480px){
-  #messages { height: 50vh; padding: 8px; }
-  input[type=text], button { font-size: 14px; padding: 8px 10px; }
-  .meta-bar { font-size: 11px; gap: 4px; }
-  .avatar { width: 24px; height: 24px; }
-  .msg { max-width: 100%; font-size: 14px; }
+.me{
+  align-self:flex-end;
+  background:#dff6e8;
+}
+.meta{
+  font-size:12px;
+  opacity:.7;
+  margin-bottom:4px;
+}
+footer{
+  padding:12px;
+  border-top:1px solid #e5e7eb;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+input,button{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+}
+button{
+  background:#2563eb;
+  color:#fff;
+  cursor:pointer;
+}
+button:disabled{
+  background:#9ca3af;
+  cursor:not-allowed;
+}
+#nameError{
+  color:red;
+  font-size:12px;
+  display:none;
 }
 </style>
 </head>
+
 <body>
 <div class="app">
-  <header>
-    <h1>Easy Chat</h1>
-    <div class="meta-bar">
-      <div class="small">Name: <strong id="displayName">(not set)</strong></div>
-      <div class="small">Room: <strong id="roomName">global</strong></div>
-      <div class="online-list" id="onlineUsers"></div>
-      <div class="typing" id="typingEl" style="display:none">is typing...</div>
-      <button id="darkModeBtn" style="margin-left:auto;padding:4px 68x;font-size:12px;">🌙 Dark Mode</button>
-    </div>
-  </header>
 
-  <div id="messages"></div>
+<header>
+  <div class="meta-bar">
+    <div>Name: <strong id="displayName">(not set)</strong></div>
+    <div>Room: <strong id="roomName">global</strong></div>
+  </div>
+</header>
 
-  <footer>
-    <div style="display:flex;gap:8px;flex:1;align-items:center">
-      <input id="nameInput" type="text" placeholder="Your display name" />
-      <input id="roomInput" type="text" placeholder="Room name (default: global)" />
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <input id="msgInput" type="text" placeholder="Type a message and press Enter" />
-      <div style="display:flex;gap:6px">
-        <button id="sendBtn">Send</button>
-        <button id="clearBtn" style="background:#ef4444">Clear</button>
-      </div>
-    </div>
-  </footer>
+<div id="messages"></div>
+
+<footer>
+  <input id="nameInput" type="text" placeholder="Your name" />
+  <div id="nameError">This name already exists in this room</div>
+
+  <input id="roomInput" type="text" placeholder="Room name (default global)" />
+  <input id="msgInput" type="text" placeholder="Type message" disabled />
+
+  <button id="sendBtn" disabled>Send</button>
+</footer>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -136,6 +117,7 @@ body.dark .online-list { color: #c0c0c0; }
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
 <script>
+// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB1kH5ViWhVpwJMaQEY0mcJhtEOia1k2aE",
   authDomain: "chat-2d825.firebaseapp.com",
@@ -143,205 +125,127 @@ const firebaseConfig = {
   projectId: "chat-2d825",
   storageBucket: "chat-2d825.appspot.com",
   messagingSenderId: "397345569962",
-  appId: "1:397345569962:web:bac031c0cf9a394820a4d3",
-  measurementId: "G-YVDC4J0CM5"
+  appId: "1:397345569962:web:bac031c0cf9a394820a4d3"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
+// Elements
 const msgInput = document.getElementById('msgInput');
 const nameInput = document.getElementById('nameInput');
 const roomInput = document.getElementById('roomInput');
+const sendBtn = document.getElementById('sendBtn');
 const messagesEl = document.getElementById('messages');
 const displayNameEl = document.getElementById('displayName');
 const roomNameEl = document.getElementById('roomName');
-const sendBtn = document.getElementById('sendBtn');
-const clearBtn = document.getElementById('clearBtn');
-const typingEl = document.getElementById('typingEl');
-const onlineUsersEl = document.getElementById('onlineUsers');
-const darkModeBtn = document.getElementById('darkModeBtn');
+const nameError = document.getElementById('nameError');
 
-let displayName = localStorage.getItem('displayName') || '';
-let roomName = localStorage.getItem('roomName') || 'global';
 let uid = null;
-let typingTimeout = null;
-let replyTo = null;
-let editMsgKey = null;
+let displayName = '';
+let roomName = 'global';
+let canSendMessage = false;
 
-nameInput.value = displayName;
-roomInput.value = roomName;
-displayNameEl.textContent = displayName || '(not set)';
-roomNameEl.textContent = roomName;
-
-if(localStorage.getItem('darkMode')==='true'){
-  document.body.classList.add('dark');
-  darkModeBtn.textContent='☀️ Light Mode';
-}
-darkModeBtn.addEventListener('click', ()=>{
-  document.body.classList.toggle('dark');
-  const isDark=document.body.classList.contains('dark');
-  localStorage.setItem('darkMode', isDark);
-  darkModeBtn.textContent=isDark?'☀️ Light Mode':'🌙 Dark Mode';
+// Auth
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    auth.signInAnonymously();
+  }else{
+    uid = user.uid;
+  }
 });
 
-function colorForId(id){
-  const colors=['#f97316','#ef4444','#06b6d4','#8b5cf6','#10b981','#3b82f6','#ef9a7a','#f43f5e'];
-  let h=0; for(let i=0;i<id.length;i++) h=(h<<5)-h+id.charCodeAt(i);
-  return colors[Math.abs(h)%colors.length];
-}
-
-auth.onAuthStateChanged(user=>{ if(!user) auth.signInAnonymously(); else uid=user.uid; });
-
-function setupPresence(room){
-  const conRef=db.ref('.info/connected');
-  conRef.on('value',snap=>{
-    if(!snap.val()) return;
-    const pRef=db.ref('presence/'+room+'/'+uid);
-    pRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
-    pRef.onDisconnect().remove();
-  });
-}
-
-function watchPresence(room){
-  const pRef=db.ref('presence/'+room);
-  pRef.on('value',snap=>{
-    const val = snap.val()||{};
-    // Update online users list
-    onlineUsersEl.innerHTML = '';
-    Object.values(val).forEach(user=>{
-      const div = document.createElement('div');
-      div.className = 'online-user';
-      const avatar = document.createElement('span');
-      avatar.className='avatar';
-      avatar.style.background=colorForId(user.name);
-      div.appendChild(avatar);
-      const name = document.createElement('span');
-      name.textContent = user.name;
-      div.appendChild(name);
-      onlineUsersEl.appendChild(div);
-    });
-  });
-}
-
-function startTyping(){
-  if(!uid) return;
-  const tRef=db.ref('typing/'+roomName+'/'+uid);
-  tRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
-  if(typingTimeout) clearTimeout(typingTimeout);
-  typingTimeout=setTimeout(()=>tRef.remove(),1500);
-}
-
-function watchTyping(room){
-  const tRef=db.ref('typing/'+room);
-  tRef.on('value',snap=>{
-    const val=snap.val()||{};
-    const names=Object.values(val).map(x=>x.name).filter(Boolean);
-    typingEl.style.display = names.length ? 'block' : 'none';
-    typingEl.textContent = names.length ? names.join(', ') + ' typing...' : '';
-  });
-}
-
-function sendMessage(){
-  const text = msgInput.value.trim();
-  if(!text || !uid) return;
-  const room = roomInput.value.trim()||'global';
-  if(editMsgKey){
-    db.ref('rooms/'+room+'/messages/'+editMsgKey).update({text});
-    editMsgKey = null;
-    msgInput.value='';
-    return;
+// 🔍 Check name unique
+async function checkNameUnique(room, uid, name){
+  const snap = await db.ref(`rooms/${room}/users`).get();
+  const users = snap.val() || {};
+  for(let id in users){
+    if(users[id].name === name && id !== uid){
+      return false;
+    }
   }
-  const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
-  if(replyTo) payload.reply = replyTo;
-  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
-    msgInput.value='';
-    db.ref('typing/'+room+'/'+uid).remove();
-    replyTo = null;
-  });
+  return true;
 }
 
-function renderMessage(snap, update=false, room){
-  const m = snap.val(); 
-  m.key = snap.key;
-  const isMe = (m.uid && uid && m.uid===uid) || (m.name===displayName);
+// Name input
+nameInput.addEventListener('input', async ()=>{
+  displayName = nameInput.value.trim();
+  if(!displayName || !uid) return;
 
-  let el = messagesEl.querySelector(`[data-key="${m.key}"]`);
-  if(!el){
-    el = document.createElement('div'); 
-    el.setAttribute('data-key', m.key); 
-    el.className = 'msg'+(isMe?' me':'');
-    messagesEl.appendChild(el);
-  }
+  displayNameEl.textContent = displayName;
 
-  const color = colorForId(String(m.uid || m.name || ''));
-  el.innerHTML = `
-    ${m.reply ? `<div class="reply-box"><strong>${m.reply.name}</strong>: ${m.reply.text}</div>` : ''}
-    <div class="meta"><span class="avatar" style="background:${color}"></span><strong>${m.name||'Anonymous'}</strong> · ${new Date(m.ts).toLocaleTimeString()}</div>
-    <div class="msg-text">${m.text}</div>
-    <div style="margin-top:4px;">
-      <button class="delete-btn" data-type="me">Delete for me</button>
-      ${isMe ? `<button class="delete-btn" data-type="all">Delete for everyone</button>` : ''}
-      ${isMe ? `<button class="edit-btn">Edit</button>` : ''}
-    </div>
-  `;
+  const unique = await checkNameUnique(roomName, uid, displayName);
 
-  el.querySelector('[data-type="me"]').addEventListener('click',()=>messagesEl.removeChild(el));
+  if(!unique){
+    canSendMessage = false;
+    sendBtn.disabled = true;
+    msgInput.disabled = true;
+    nameError.style.display = 'block';
+  }else{
+    canSendMessage = true;
+    sendBtn.disabled = false;
+    msgInput.disabled = false;
+    nameError.style.display = 'none';
 
-  if(isMe){
-    const btnAll = el.querySelector('[data-type="all"]');
-    if(btnAll) btnAll.addEventListener('click', ()=>{
-      db.ref('rooms/'+room+'/messages/'+m.key).remove();
-    });
-
-    const btnEdit = el.querySelector('.edit-btn');
-    if(btnEdit) btnEdit.addEventListener('click', ()=>{
-      msgInput.value = m.text;
-      msgInput.focus();
-      editMsgKey = m.key;
+    db.ref(`rooms/${roomName}/users/${uid}`).set({
+      name: displayName
     });
   }
+});
 
-  el.addEventListener('click', ()=>{
-    replyTo = {name:m.name||'Anonymous', text:m.text};
-    msgInput.focus();
-  });
+// Room change
+roomInput.addEventListener('change', ()=>{
+  roomName = roomInput.value.trim() || 'global';
+  roomNameEl.textContent = roomName;
 
-  if(!update) messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function listenRoom(room){
   messagesEl.innerHTML='';
-  const ref=db.ref('rooms/'+room+'/messages').limitToLast(200);
-  ref.on('child_added', snap => renderMessage(snap, false, room));
-  ref.on('child_changed', snap => renderMessage(snap, true, room));
-  ref.on('child_removed', snap=>{
-    const msgEl = messagesEl.querySelector(`[data-key="${snap.key}"]`);
-    if(msgEl) messagesEl.removeChild(msgEl);
+  canSendMessage = false;
+  sendBtn.disabled = true;
+  msgInput.disabled = true;
+
+  listenMessages();
+});
+
+// Send message
+function sendMessage(){
+  if(!canSendMessage) return;
+
+  const text = msgInput.value.trim();
+  if(!text) return;
+
+  db.ref(`rooms/${roomName}/messages`).push({
+    name: displayName,
+    text,
+    uid,
+    ts: Date.now()
   });
+
+  msgInput.value='';
 }
 
 sendBtn.addEventListener('click', sendMessage);
-msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
-msgInput.addEventListener('input', startTyping);
-
-roomInput.addEventListener('change', ()=>{
-  roomName = roomInput.value.trim()||'global';
-  roomNameEl.textContent = roomName;
-  localStorage.setItem('roomName', roomName);
-  setupPresence(roomName); listenRoom(roomName); watchPresence(roomName); watchTyping(roomName);
+msgInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter') sendMessage();
 });
 
-nameInput.addEventListener('change', ()=>{
-  displayName = nameInput.value.trim()||'Anonymous';
-  displayNameEl.textContent = displayName;
-  localStorage.setItem('displayName', displayName);
-  if(uid) db.ref('presence/'+roomName+'/'+uid).update({name:displayName});
-});
+// Listen messages
+function listenMessages(){
+  db.ref(`rooms/${roomName}/messages`).limitToLast(100)
+    .on('child_added', snap=>{
+      const m = snap.val();
+      const el = document.createElement('div');
+      el.className = 'msg' + (m.uid===uid?' me':'');
+      el.innerHTML = `
+        <div class="meta">${m.name}</div>
+        <div>${m.text}</div>
+      `;
+      messagesEl.appendChild(el);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+}
 
-clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
-
-listenRoom(roomName); setupPresence(roomName); watchPresence(roomName); watchTyping(roomName);
+listenMessages();
 </script>
 </body>
 </html>
