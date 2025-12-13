@@ -162,6 +162,14 @@ const typingEl = document.getElementById('typingEl');
 const onlineUsersEl = document.getElementById('onlineUsers');
 const darkModeBtn = document.getElementById('darkModeBtn');
 
+// Add a warning element for name conflicts
+const nameWarning = document.createElement('div');
+nameWarning.id = 'nameWarning';
+nameWarning.style.color = 'red';
+nameWarning.style.fontSize = '12px';
+nameWarning.style.display = 'none';
+nameInput.parentNode.appendChild(nameWarning);
+
 let displayName = localStorage.getItem('displayName') || '';
 let roomName = localStorage.getItem('roomName') || 'global';
 let uid = null;
@@ -192,10 +200,13 @@ function colorForId(id){
 }
 
 // ----------------- AUTH & PRESENCE -----------------
+nameInput.disabled = true; // disable until uid ready
+
 auth.onAuthStateChanged(user => {
   if (!user) auth.signInAnonymously();
   else {
     uid = user.uid;
+    nameInput.disabled = false;
     setupPresence(roomName);
     watchPresence(roomName);
     watchTyping(roomName);
@@ -325,27 +336,27 @@ function listenRoom(room){
 async function isNameTaken(room, name){
   const snap = await db.ref('presence/' + room).once('value');
   const users = snap.val() || {};
-  // Only consider other users
   return Object.entries(users).some(([userId, user]) => user.name === name && userId !== uid);
 }
 
-nameInput.addEventListener('change', async () => {
+let nameChangeTimeout;
+nameInput.addEventListener('input', () => {
+  clearTimeout(nameChangeTimeout);
+  nameChangeTimeout = setTimeout(checkName, 200);
+});
+
+async function checkName(){
   let newName = nameInput.value.trim() || 'Anonymous';
-  
   if(uid && await isNameTaken(roomName, newName)){
-    alert('This display name is already taken in this room. Please choose another.');
-    nameInput.value = displayName; // revert to previous
+    nameWarning.style.display = 'block';
     return;
   }
-
+  nameWarning.style.display = 'none';
   displayName = newName;
   displayNameEl.textContent = displayName;
   localStorage.setItem('displayName', displayName);
-
-  if(uid) {
-    db.ref('presence/' + roomName + '/' + uid).update({ name: displayName });
-  }
-});
+  if(uid) db.ref('presence/' + roomName + '/' + uid).update({ name: displayName });
+}
 
 // ----------------- ROOM CHANGE -----------------
 roomInput.addEventListener('change', ()=> {
@@ -356,6 +367,7 @@ roomInput.addEventListener('change', ()=> {
   listenRoom(roomName);
   watchPresence(roomName);
   watchTyping(roomName);
+  checkName(); // re-validate name in new room
 });
 
 // ----------------- OTHER -----------------
