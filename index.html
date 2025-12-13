@@ -325,7 +325,8 @@ function listenRoom(room){
 async function isNameTaken(room, name){
   const snap = await db.ref('presence/' + room).once('value');
   const users = snap.val() || {};
-  return Object.values(users).some(user => user.name === name && uid !== user.uid);
+  // Only consider other users
+  return Object.entries(users).some(([userId, user]) => user.name === name && userId !== uid);
 }
 
 nameInput.addEventListener('change', async () => {
@@ -333,7 +334,7 @@ nameInput.addEventListener('change', async () => {
   
   if(uid && await isNameTaken(roomName, newName)){
     alert('This display name is already taken in this room. Please choose another.');
-    nameInput.value = displayName;
+    nameInput.value = displayName; // revert to previous
     return;
   }
 
@@ -341,7 +342,9 @@ nameInput.addEventListener('change', async () => {
   displayNameEl.textContent = displayName;
   localStorage.setItem('displayName', displayName);
 
-  if(uid) db.ref('presence/'+roomName+'/'+uid).update({name:displayName});
+  if(uid) {
+    db.ref('presence/' + roomName + '/' + uid).update({ name: displayName });
+  }
 });
 
 // ----------------- ROOM CHANGE -----------------
@@ -361,3 +364,5 @@ msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); e
 msgInput.addEventListener('input', startTyping);
 clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
 </script>
+</body>
+</html>
