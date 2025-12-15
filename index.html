@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Easy Chat</title>
+  <div class="small">Version: <strong id="appVersion">–</strong></div>
 <style>
 body {
   font-family: Inter, system-ui, Arial;
@@ -104,6 +105,22 @@ body.dark .online-list { color: #c0c0c0; }
 </style>
 </head>
 <body>
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg.active) {
+      reg.active.postMessage("GET_VERSION");
+    }
+  });
+
+  navigator.serviceWorker.addEventListener("message", event => {
+    if (event.data && event.data.version) {
+      document.getElementById("appVersion").textContent = event.data.version;
+    }
+  });
+}
+</script>
+
   <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js")
