@@ -1,33 +1,39 @@
-const CACHE_NAME = "easy-chat-v1";
+const APP_VERSION = "1.0.1";
+const CACHE_NAME = "easy-chat-" + APP_VERSION;
 
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./chat.png",
-  "https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js",
-  "https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js",
-  "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"
+  "./chat.png"
 ];
 
-self.addEventListener("install", e => {
-  e.waitUntil(
+self.addEventListener("install", event => {
+  console.log("Installing version", APP_VERSION);
+  self.skipWaiting();
+  event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
+self.addEventListener("activate", event => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log("Deleting old cache:", key);
+            return caches.delete(key);
+          }
+        })
+      )
     )
   );
   self.clients.claim();
 });
 
-self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(res => res || fetch(e.request))
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(res => res || fetch(event.request))
   );
 });
