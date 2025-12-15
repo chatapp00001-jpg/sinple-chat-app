@@ -106,13 +106,50 @@ body.dark .online-list { color: #c0c0c0; }
 <body>
   <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("Service Worker Registered"))
-      .catch(err => console.log("SW error", err));
-  });
+  navigator.serviceWorker.register("service-worker.js")
+    .then(reg => {
+
+      // Detect new version
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            // 🔔 New version ready
+            showUpdateToast();
+          }
+        });
+      });
+
+    });
+}
+
+function showUpdateToast(){
+  const bar = document.createElement("div");
+  bar.style.position = "fixed";
+  bar.style.bottom = "16px";
+  bar.style.left = "50%";
+  bar.style.transform = "translateX(-50%)";
+  bar.style.background = "#2563eb";
+  bar.style.color = "#fff";
+  bar.style.padding = "10px 14px";
+  bar.style.borderRadius = "8px";
+  bar.style.boxShadow = "0 4px 20px rgba(0,0,0,.2)";
+  bar.style.zIndex = "9999";
+  bar.innerHTML = `
+    New version available
+    <button style="margin-left:10px;background:#fff;color:#2563eb;border:none;padding:4px 8px;border-radius:6px;cursor:pointer">
+      Refresh
+    </button>
+  `;
+
+  bar.querySelector("button").onclick = () => location.reload(true);
+  document.body.appendChild(bar);
 }
 </script>
+
 
 <div class="app">
   <header>
