@@ -47,6 +47,10 @@ header h1 { font-size: 16px; margin: 0; }
   background: linear-gradient(180deg,#f9fbff,#fff);
   transition: background 0.3s;
 }
+  .meta-bar .version-line {
+  width: 100%;
+  margin-top: 2px;
+}
 body.dark #messages { background: linear-gradient(180deg,#2a2a2a,#1e1e1e); }
 .msg {
   max-width: 75%;
@@ -122,6 +126,22 @@ if ("serviceWorker" in navigator) {
 
   <script>
 if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg.active) {
+      reg.active.postMessage("GET_VERSION");
+    }
+  });
+
+  navigator.serviceWorker.addEventListener("message", event => {
+    if (event.data && event.data.version) {
+      document.getElementById("appVersion").textContent = event.data.version;
+    }
+  });
+}
+</script>
+
+  <script>
+if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js")
     .then(reg => {
 
@@ -170,20 +190,17 @@ function showUpdateToast(){
 <div class="app">
   <header>
     <h1>Easy Chat</h1>
-  <div class="meta-bar">
+ <div class="meta-bar">
   <div class="small">Name: <strong id="displayName">(not set)</strong></div>
   <div class="small">Room: <strong id="roomName">global</strong></div>
 
-  <!-- 🔽 Force new line -->
-  <div style="flex-basis:100%;height:0;"></div>
-
-  <div class="small">Version: <strong id="appVersion">–</strong></div>
+  <!-- New line for version -->
+  <div class="small" style="width:100%;">Version: <strong id="appVersion">–</strong></div>
 
   <div class="online-list" id="onlineUsers"></div>
   <div class="typing" id="typingEl" style="display:none">is typing...</div>
   <button id="darkModeBtn" style="margin-left:auto;padding:4px 6px;font-size:12px;">🌙 Dark Mode</button>
 </div>
-
 
   </header>
 
