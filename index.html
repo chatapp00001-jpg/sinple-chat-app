@@ -140,26 +140,36 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-  <script>
+<script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js")
     .then(reg => {
+      console.log("SW Registered");
 
-      // Detect new version
+      // send message to get version when SW is ready
+      navigator.serviceWorker.ready.then(r => {
+        if (r.active) r.active.postMessage("GET_VERSION");
+      });
+
+      // detect SW update
       reg.addEventListener("updatefound", () => {
         const newWorker = reg.installing;
         newWorker.addEventListener("statechange", () => {
-          if (
-            newWorker.state === "installed" &&
-            navigator.serviceWorker.controller
-          ) {
-            // 🔔 New version ready
+          if(newWorker.state === "installed" && navigator.serviceWorker.controller){
             showUpdateToast();
+            // fetch new version after update
+            if(navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("GET_VERSION");
           }
         });
       });
 
     });
+
+  navigator.serviceWorker.addEventListener("message", event => {
+    if (event.data && event.data.version) {
+      document.getElementById("appVersion").textContent = event.data.version;
+    }
+  });
 }
 
 function showUpdateToast(){
@@ -180,29 +190,29 @@ function showUpdateToast(){
       Refresh
     </button>
   `;
-
   bar.querySelector("button").onclick = () => location.reload(true);
   document.body.appendChild(bar);
 }
 </script>
 
 
+
 <div class="app">
-  <header>
-    <h1>Easy Chat</h1>
- <div class="meta-bar">
-  <div class="small">Name: <strong id="displayName">(not set)</strong></div>
-  <div class="small">Room: <strong id="roomName">global</strong></div>
+ <header>
+  <h1>Easy Chat</h1>
+  <div class="meta-bar">
+    <div class="small">Name: <strong id="displayName">(not set)</strong></div>
+    <div class="small">Room: <strong id="roomName">global</strong></div>
 
-  <!-- New line for version -->
-  <div class="small" style="width:100%;">Version: <strong id="appVersion">–</strong></div>
+    <!-- Version on next line -->
+    <div class="small" style="width:100%;">Version: <strong id="appVersion">–</strong></div>
 
-  <div class="online-list" id="onlineUsers"></div>
-  <div class="typing" id="typingEl" style="display:none">is typing...</div>
-  <button id="darkModeBtn" style="margin-left:auto;padding:4px 6px;font-size:12px;">🌙 Dark Mode</button>
-</div>
+    <div class="online-list" id="onlineUsers"></div>
+    <div class="typing" id="typingEl" style="display:none">is typing...</div>
+    <button id="darkModeBtn" style="margin-left:auto;padding:4px 6px;font-size:12px;">🌙 Dark Mode</button>
+  </div>
+</header>
 
-  </header>
 
   <div id="messages"></div>
 
