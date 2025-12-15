@@ -170,14 +170,18 @@ function showUpdateToast(){
 <div class="app">
   <header>
     <h1>Easy Chat</h1>
-    <div class="meta-bar">
-      <div class="small">Name: <strong id="displayName">(not set)</strong></div>
-      <div class="small">Room: <strong id="roomName">global</strong></div><br/>
-         <div class="small">Version: <strong id="appVersion">–</strong></div>
-      <div class="online-list" id="onlineUsers"></div>
-      <div class="typing" id="typingEl" style="display:none">is typing...</div>
-      <button id="darkModeBtn" style="margin-left:auto;padding:4px 6px;font-size:12px;">🌙 Dark Mode</button>
-    </div>
+   <div class="meta-bar">
+  <div class="small">Name: <strong id="displayName">(not set)</strong></div>
+  <div class="small">Room: <strong id="roomName">global</strong></div>
+
+  <!-- 🔽 ADD THIS LINE -->
+  <div class="small">Version: <strong id="appVersion">–</strong></div>
+
+  <div class="online-list" id="onlineUsers"></div>
+  <div class="typing" id="typingEl" style="display:none">is typing...</div>
+  <button id="darkModeBtn" style="margin-left:auto;padding:4px 6px;font-size:12px;">🌙 Dark Mode</button>
+</div>
+
   </header>
 
   <div id="messages"></div>
