@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <link rel="icon" href="chat.png" type="image/png" />
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Easy Chat</title>
@@ -102,6 +104,16 @@ body.dark .online-list { color: #c0c0c0; }
 </style>
 </head>
 <body>
+  <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("Service Worker Registered"))
+      .catch(err => console.log("SW error", err));
+  });
+}
+</script>
+
 <div class="app">
   <header>
     <h1>Easy Chat</h1>
