@@ -195,24 +195,11 @@ auth.onAuthStateChanged(user=>{ if(!user) auth.signInAnonymously(); else uid=use
 
 function setupPresence(room){
   const conRef=db.ref('.info/connected');
-  conRef.on('value', snap=>{
+  conRef.on('value',snap=>{
     if(!snap.val()) return;
-
     const pRef=db.ref('presence/'+room+'/'+uid);
-    const userName = nameInput.value||'Anonymous';
-
-    // check if name already exists
-    db.ref('presence/'+room).once('value').then(snap=>{
-      const val = snap.val()||{};
-      const nameTaken = Object.values(val).some(u => u.name === userName && u.uid !== uid);
-      if(nameTaken){
-        alert('This display name is already in use in this room. Please change your name.');
-        return;
-      } else {
-        pRef.set({name:userName, ts:Date.now()});
-        pRef.onDisconnect().remove();
-      }
-    });
+    pRef.set({name:nameInput.value||'Anonymous', ts:Date.now()});
+    pRef.onDisconnect().remove();
   });
 }
 
@@ -220,6 +207,7 @@ function watchPresence(room){
   const pRef=db.ref('presence/'+room);
   pRef.on('value',snap=>{
     const val = snap.val()||{};
+    // Update online users list
     onlineUsersEl.innerHTML = '';
     Object.values(val).forEach(user=>{
       const div = document.createElement('div');
@@ -254,30 +242,16 @@ function watchTyping(room){
   });
 }
 
-// Updated sendMessage with name check
-async function sendMessage(){
+function sendMessage(){
   const text = msgInput.value.trim();
   if(!text || !uid) return;
-
   const room = roomInput.value.trim()||'global';
-
-  // Check if this name already exists in the room
-  const presenceSnap = await db.ref('presence/'+room).once('value');
-  const presence = presenceSnap.val() || {};
-  const nameTaken = Object.values(presence).some(u => u.name === (nameInput.value||'Anonymous') && u.uid !== uid);
-
-  if(nameTaken){
-    alert('This display name is already in use in this room. Please change your name.');
-    return; // block sending
-  }
-
   if(editMsgKey){
     db.ref('rooms/'+room+'/messages/'+editMsgKey).update({text});
     editMsgKey = null;
     msgInput.value='';
     return;
   }
-
   const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
   if(replyTo) payload.reply = replyTo;
   db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
@@ -316,13 +290,22 @@ function renderMessage(snap, update=false, room){
 
   if(isMe){
     const btnAll = el.querySelector('[data-type="all"]');
-    if(btnAll) btnAll.addEventListener('click', ()=>{ db.ref('rooms/'+room+'/messages/'+m.key).remove(); });
+    if(btnAll) btnAll.addEventListener('click', ()=>{
+      db.ref('rooms/'+room+'/messages/'+m.key).remove();
+    });
 
     const btnEdit = el.querySelector('.edit-btn');
-    if(btnEdit) btnEdit.addEventListener('click', ()=>{ msgInput.value = m.text; msgInput.focus(); editMsgKey = m.key; });
+    if(btnEdit) btnEdit.addEventListener('click', ()=>{
+      msgInput.value = m.text;
+      msgInput.focus();
+      editMsgKey = m.key;
+    });
   }
 
-  el.addEventListener('click', ()=>{ replyTo = {name:m.name||'Anonymous', text:m.text}; msgInput.focus(); });
+  el.addEventListener('click', ()=>{
+    replyTo = {name:m.name||'Anonymous', text:m.text};
+    msgInput.focus();
+  });
 
   if(!update) messagesEl.scrollTop = messagesEl.scrollHeight;
 }
