@@ -5,7 +5,7 @@
   <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2563eb">
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" /><br/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Easy Chat</title>
 <style>
 body {
@@ -268,6 +268,8 @@ let uid = null;
 let typingTimeout = null;
 let replyTo = null;
 let editMsgKey = null;
+let hasJoinedRoom = false;
+
 
 nameInput.value = displayName;
 roomInput.value = roomName;
@@ -278,6 +280,13 @@ if(localStorage.getItem('darkMode')==='true'){
   document.body.classList.add('dark');
   darkModeBtn.textContent='☀️ Light Mode';
 }
+  if (localStorage.getItem("roomName")) {
+  hasJoinedRoom = true;
+  nameInput.disabled = true;
+  nameInput.style.opacity = "0.6";
+  nameInput.title = "Name cannot be changed after joining room";
+}
+
 darkModeBtn.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
   const isDark=document.body.classList.contains('dark');
@@ -426,18 +435,37 @@ msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); e
 msgInput.addEventListener('input', startTyping);
 
 roomInput.addEventListener('change', ()=>{
-  roomName = roomInput.value.trim()||'global';
+  roomName = roomInput.value.trim() || 'global';
   roomNameEl.textContent = roomName;
   localStorage.setItem('roomName', roomName);
-  setupPresence(roomName); listenRoom(roomName); watchPresence(roomName); watchTyping(roomName);
+
+  if (!hasJoinedRoom) {
+    hasJoinedRoom = true;
+
+    // 🔒 LOCK NAME
+    nameInput.disabled = true;
+    nameInput.style.opacity = "0.6";
+    nameInput.title = "Name cannot be changed after joining room";
+  }
+
+  setupPresence(roomName);
+  listenRoom(roomName);
+  watchPresence(roomName);
+  watchTyping(roomName);
 });
 
+
 nameInput.addEventListener('change', ()=>{
-  displayName = nameInput.value.trim()||'Anonymous';
+  if (hasJoinedRoom) {
+    nameInput.value = displayName;
+    return;
+  }
+
+  displayName = nameInput.value.trim() || 'Anonymous';
   displayNameEl.textContent = displayName;
   localStorage.setItem('displayName', displayName);
-  if(uid) db.ref('presence/'+roomName+'/'+uid).update({name:displayName});
 });
+
 
 clearBtn.addEventListener('click', ()=>messagesEl.innerHTML='');
 
