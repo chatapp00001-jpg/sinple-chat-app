@@ -277,26 +277,21 @@ let editMsgKey = null;
 let hasSentFirstMessage = localStorage.getItem("nameLocked") === "true";
 
 leaveRoomBtn.addEventListener("click", () => {
-  if (!uid) return;
-
-  // Remove user presence in the current room
   const pRef = db.ref('presence/' + roomName + '/' + uid);
-  pRef.remove();
+  pRef.remove(); // Remove presence
 
-  // Unlock the display name
-  hasSentFirstMessage = false;
+  hasSentFirstMessage = false; // Unlock name
   localStorage.setItem("nameLocked", "false");
-
   nameInput.disabled = false;
   nameInput.style.opacity = "1";
   nameInput.title = "";
+  nameLockIcon.style.display = "none"; // Hide 🔐
 
-  // Optionally reset room to default
+  // Reset room to default
   roomName = 'global';
   roomInput.value = roomName;
   roomNameEl.textContent = roomName;
 
-  // Stop listening & clear messages
   messagesEl.innerHTML = '';
   listenRoom(roomName);
   setupPresence(roomName);
@@ -495,12 +490,6 @@ roomInput.addEventListener('change', ()=>{
   roomNameEl.textContent = roomName;
   localStorage.setItem('roomName', roomName);
   let roomName = localStorage.getItem('roomName') || 'global';
-roomInput.value = roomName;
-roomNameEl.textContent = roomName;
-  localStorage.setItem('roomName', 'global');
-roomName = 'global';
-roomInput.value = roomName;
-roomNameEl.textContent = roomName;
 
   // ❌ NO NAME LOCK HERE
 
