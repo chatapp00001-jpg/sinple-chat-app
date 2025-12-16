@@ -108,46 +108,69 @@ body.dark .online-list { color: #c0c0c0; }
 </style>
 </head>
 <body>
- <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg.active) {
+      reg.active.postMessage("GET_VERSION");
+    }
+  });
+
+  navigator.serviceWorker.addEventListener("message", event => {
+    if (event.data && event.data.version) {
+      document.getElementById("appVersion").textContent = event.data.version;
+    }
+  });
+}
+</script>
+
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg.active) {
+      reg.active.postMessage("GET_VERSION");
+    }
+  });
+
+  navigator.serviceWorker.addEventListener("message", event => {
+    if (event.data && event.data.version) {
+      document.getElementById("appVersion").textContent = event.data.version;
+    }
+  });
+}
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
     .then(reg => {
-      console.log('SW registered');
+      console.log("SW Registered");
 
-      // Ask SW for version when ready
+      // send message to get version when SW is ready
       navigator.serviceWorker.ready.then(r => {
-        if(r.active) r.active.postMessage({type: 'GET_VERSION'});
+        if (r.active) r.active.postMessage("GET_VERSION");
       });
 
-      // Listen for SW messages
-      navigator.serviceWorker.addEventListener('message', event => {
-        if(event.data && event.data.version) {
-          const el = document.getElementById('appVersion');
-          if(el) el.textContent = event.data.version;
-        }
-      });
-
-      // Detect SW update
-      reg.addEventListener('updatefound', () => {
+      // detect SW update
+      reg.addEventListener("updatefound", () => {
         const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
-            const bar = document.createElement('div');
-            bar.style.cssText = "position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#2563eb;color:#fff;padding:10px 14px;border-radius:8px;z-index:9999;";
-            bar.innerHTML = `New version available <button style="margin-left:10px;background:#fff;color:#2563eb;border:none;padding:4px 8px;border-radius:6px;cursor:pointer">Refresh</button>`;
-            bar.querySelector('button').onclick = ()=>location.reload(true);
-            document.body.appendChild(bar);
-
-            // Request updated version
-            if(navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({type:'GET_VERSION'});
+        newWorker.addEventListener("statechange", () => {
+          if(newWorker.state === "installed" && navigator.serviceWorker.controller){
+            showUpdateToast();
+            // fetch new version after update
+            if(navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("GET_VERSION");
           }
         });
       });
 
     });
-}
-</script>
 
+  navigator.serviceWorker.addEventListener("message", event => {
+    if (event.data && event.data.version) {
+      document.getElementById("appVersion").textContent = event.data.version;
+    }
+  });
+}
 
 function showUpdateToast(){
   const bar = document.createElement("div");
