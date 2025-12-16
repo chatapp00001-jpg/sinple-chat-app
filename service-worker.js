@@ -13,7 +13,7 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
-const APP_VERSION = "1.0.1";
+const APP_VERSION = "1.0.2";
 
 self.addEventListener("message", event => {
   if (event.data && event.data.type === "GET_VERSION") {
