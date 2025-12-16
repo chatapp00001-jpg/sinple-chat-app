@@ -494,6 +494,13 @@ roomInput.addEventListener('change', ()=>{
   roomName = roomInput.value.trim() || 'global';
   roomNameEl.textContent = roomName;
   localStorage.setItem('roomName', roomName);
+  let roomName = localStorage.getItem('roomName') || 'global';
+roomInput.value = roomName;
+roomNameEl.textContent = roomName;
+  localStorage.setItem('roomName', 'global');
+roomName = 'global';
+roomInput.value = roomName;
+roomNameEl.textContent = roomName;
 
   // ❌ NO NAME LOCK HERE
 
