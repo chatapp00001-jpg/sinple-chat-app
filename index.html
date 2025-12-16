@@ -388,15 +388,6 @@ function sendMessage(){
   });
 }
 
-  const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
-  if(replyTo) payload.reply = replyTo;
-  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
-    msgInput.value='';
-    db.ref('typing/'+room+'/'+uid).remove();
-    replyTo = null;
-  });
-}
-
 function renderMessage(snap, update=false, room){
   const m = snap.val(); 
   m.key = snap.key;
@@ -480,12 +471,6 @@ nameInput.addEventListener('change', ()=>{
     nameInput.value = displayName;
     return;
   }
-
-  displayName = nameInput.value.trim() || 'Anonymous';
-  displayNameEl.textContent = displayName;
-  localStorage.setItem('displayName', displayName);
-});
-
 
   displayName = nameInput.value.trim() || 'Anonymous';
   displayNameEl.textContent = displayName;
