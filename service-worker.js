@@ -1,35 +1,33 @@
-const APP_VERSION = "1.0.1"; // change this for every update
-const CACHE_NAME = "easy-chat-" + APP_VERSION;
+importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
 
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./chat.png"
-];
+const firebaseConfig = {
+  apiKey: "AIzaSyB1kH5ViWhVpwJMaQEY0mcJhtEOia1k2aE",
+  authDomain: "chat-2d825.firebaseapp.com",
+  projectId: "chat-2d825",
+  messagingSenderId: "397345569962",
+  appId: "1:397345569962:web:bac031c0cf9a394820a4d3"
+};
 
-self.addEventListener("install", event => {
-  self.skipWaiting();
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
-});
+firebase.initializeApp(firebaseConfig);
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(key => key !== CACHE_NAME && caches.delete(key)))
-    )
-  );
-  self.clients.claim();
-});
+const messaging = firebase.messaging();
 
-// fetch handler
-self.addEventListener("fetch", event => {
-  event.respondWith(caches.match(event.request).then(res => res || fetch(event.request)));
-});
+const APP_VERSION = "1.0.5";
 
-// message listener for version
 self.addEventListener("message", event => {
-  if (event.data === "GET_VERSION") {
+  if (event.data?.type === "GET_VERSION") {
     event.source.postMessage({ version: APP_VERSION });
   }
+});
+
+messaging.onBackgroundMessage(payload => {
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: "/chat.png",
+    badge: "/chat.png"
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
