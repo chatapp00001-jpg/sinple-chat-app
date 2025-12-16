@@ -485,14 +485,16 @@ sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
 msgInput.addEventListener('input', startTyping);
 
-roomInput.addEventListener('change', ()=>{
+roomInput.addEventListener('change', () => {
+  // Update global roomName
   roomName = roomInput.value.trim() || 'global';
+
+  // Update header & localStorage
   roomNameEl.textContent = roomName;
   localStorage.setItem('roomName', roomName);
-  let roomName = localStorage.getItem('roomName') || 'global';
 
-  // ❌ NO NAME LOCK HERE
-
+  // Re-setup presence and messages for the new room
+  messagesEl.innerHTML = '';
   setupPresence(roomName);
   listenRoom(roomName);
   watchPresence(roomName);
