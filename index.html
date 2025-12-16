@@ -213,6 +213,7 @@ function showUpdateToast(){
     <div class="online-list" id="onlineUsers"></div>
     <div class="typing" id="typingEl" style="display:none">is typing...</div>
     <button id="darkModeBtn" style="margin-left:auto;padding:4px 6px;font-size:12px;">🌙 Dark Mode</button>
+    <button id="leaveRoomBtn" style="padding:4px 6px;font-size:12px;margin-left:8px;">🚪 Leave Room</button>
   </div>
 </header>
 
@@ -265,6 +266,7 @@ const typingEl = document.getElementById('typingEl');
 const onlineUsersEl = document.getElementById('onlineUsers');
 const darkModeBtn = document.getElementById('darkModeBtn');
 const nameLockIcon = document.getElementById("nameLockIcon");
+const leaveRoomBtn = document.getElementById("leaveRoomBtn");
 
 let displayName = localStorage.getItem('displayName') || '';
 let roomName = localStorage.getItem('roomName') || 'global';
@@ -273,6 +275,34 @@ let typingTimeout = null;
 let replyTo = null;
 let editMsgKey = null;
 let hasSentFirstMessage = localStorage.getItem("nameLocked") === "true";
+
+leaveRoomBtn.addEventListener("click", () => {
+  if (!uid) return;
+
+  // Remove user presence in the current room
+  const pRef = db.ref('presence/' + roomName + '/' + uid);
+  pRef.remove();
+
+  // Unlock the display name
+  hasSentFirstMessage = false;
+  localStorage.setItem("nameLocked", "false");
+
+  nameInput.disabled = false;
+  nameInput.style.opacity = "1";
+  nameInput.title = "";
+
+  // Optionally reset room to default
+  roomName = 'global';
+  roomInput.value = roomName;
+  roomNameEl.textContent = roomName;
+
+  // Stop listening & clear messages
+  messagesEl.innerHTML = '';
+  listenRoom(roomName);
+  setupPresence(roomName);
+  watchPresence(roomName);
+  watchTyping(roomName);
+});
 
 nameInput.value = displayName;
 roomInput.value = roomName;
