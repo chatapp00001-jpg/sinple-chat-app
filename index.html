@@ -268,8 +268,7 @@ let uid = null;
 let typingTimeout = null;
 let replyTo = null;
 let editMsgKey = null;
-let hasJoinedRoom = false;
-
+let hasSentFirstMessage = localStorage.getItem("nameLocked") === "true";
 
 nameInput.value = displayName;
 roomInput.value = roomName;
@@ -280,11 +279,10 @@ if(localStorage.getItem('darkMode')==='true'){
   document.body.classList.add('dark');
   darkModeBtn.textContent='☀️ Light Mode';
 }
-  if (localStorage.getItem("roomName")) {
-  hasJoinedRoom = true;
+if (hasSentFirstMessage) {
   nameInput.disabled = true;
   nameInput.style.opacity = "0.6";
-  nameInput.title = "Name cannot be changed after joining room";
+  nameInput.title = "Name locked after first message";
 }
 
 darkModeBtn.addEventListener('click', ()=>{
@@ -354,13 +352,42 @@ function watchTyping(room){
 function sendMessage(){
   const text = msgInput.value.trim();
   if(!text || !uid) return;
+
   const room = roomInput.value.trim()||'global';
+
+  // 🔒 LOCK NAME AFTER FIRST MESSAGE
+  if (!hasSentFirstMessage) {
+    hasSentFirstMessage = true;
+    localStorage.setItem("nameLocked", "true");
+
+    nameInput.disabled = true;
+    nameInput.style.opacity = "0.6";
+    nameInput.title = "Name locked after first message";
+  }
+
   if(editMsgKey){
     db.ref('rooms/'+room+'/messages/'+editMsgKey).update({text});
     editMsgKey = null;
     msgInput.value='';
     return;
   }
+
+  const payload = {
+    name: nameInput.value || 'Anonymous',
+    text,
+    ts: Date.now(),
+    uid
+  };
+
+  if(replyTo) payload.reply = replyTo;
+
+  db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
+    msgInput.value='';
+    db.ref('typing/'+room+'/'+uid).remove();
+    replyTo = null;
+  });
+}
+
   const payload = {name:nameInput.value||'Anonymous', text, ts:Date.now(), uid};
   if(replyTo) payload.reply = replyTo;
   db.ref('rooms/'+room+'/messages').push(payload).then(()=>{
@@ -439,14 +466,7 @@ roomInput.addEventListener('change', ()=>{
   roomNameEl.textContent = roomName;
   localStorage.setItem('roomName', roomName);
 
-  if (!hasJoinedRoom) {
-    hasJoinedRoom = true;
-
-    // 🔒 LOCK NAME
-    nameInput.disabled = true;
-    nameInput.style.opacity = "0.6";
-    nameInput.title = "Name cannot be changed after joining room";
-  }
+  // ❌ NO NAME LOCK HERE
 
   setupPresence(roomName);
   listenRoom(roomName);
@@ -456,10 +476,16 @@ roomInput.addEventListener('change', ()=>{
 
 
 nameInput.addEventListener('change', ()=>{
-  if (hasJoinedRoom) {
+  if (hasSentFirstMessage) {
     nameInput.value = displayName;
     return;
   }
+
+  displayName = nameInput.value.trim() || 'Anonymous';
+  displayNameEl.textContent = displayName;
+  localStorage.setItem('displayName', displayName);
+});
+
 
   displayName = nameInput.value.trim() || 'Anonymous';
   displayNameEl.textContent = displayName;
