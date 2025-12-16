@@ -201,7 +201,10 @@ function showUpdateToast(){
  <header>
   <h1>Easy Chat</h1>
   <div class="meta-bar">
-    <div class="small">Name: <strong id="displayName">(not set)</strong></div>
+   <div class="small">
+  Name: <strong id="displayName">(not set)</strong>
+  <span id="nameLockIcon" title="Name locked" style="display:none; margin-left:6px;">🔐</span>
+</div>
     <div class="small">Room: <strong id="roomName">global</strong></div>
 
     <!-- Version on next line -->
@@ -261,6 +264,7 @@ const clearBtn = document.getElementById('clearBtn');
 const typingEl = document.getElementById('typingEl');
 const onlineUsersEl = document.getElementById('onlineUsers');
 const darkModeBtn = document.getElementById('darkModeBtn');
+const nameLockIcon = document.getElementById("nameLockIcon");
 
 let displayName = localStorage.getItem('displayName') || '';
 let roomName = localStorage.getItem('roomName') || 'global';
@@ -283,6 +287,7 @@ if (hasSentFirstMessage) {
   nameInput.disabled = true;
   nameInput.style.opacity = "0.6";
   nameInput.title = "Name locked after first message";
+  nameLockIcon.style.display = "inline"; // 🔐 show icon
 }
 
 darkModeBtn.addEventListener('click', ()=>{
@@ -356,14 +361,17 @@ function sendMessage(){
   const room = roomInput.value.trim()||'global';
 
   // 🔒 LOCK NAME AFTER FIRST MESSAGE
-  if (!hasSentFirstMessage) {
-    hasSentFirstMessage = true;
-    localStorage.setItem("nameLocked", "true");
+ if (!hasSentFirstMessage) {
+  hasSentFirstMessage = true;
+  localStorage.setItem("nameLocked", "true");
 
-    nameInput.disabled = true;
-    nameInput.style.opacity = "0.6";
-    nameInput.title = "Name locked after first message";
-  }
+  nameInput.disabled = true;
+  nameInput.style.opacity = "0.6";
+  nameInput.title = "Name locked after first message";
+
+  // 🔐 show lock icon
+  nameLockIcon.style.display = "inline";
+}
 
   if(editMsgKey){
     db.ref('rooms/'+room+'/messages/'+editMsgKey).update({text});
