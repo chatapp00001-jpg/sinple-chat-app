@@ -16,7 +16,7 @@ const messaging = firebase.messaging();
 const APP_VERSION = "1.0.5";
 
 self.addEventListener("message", event => {
-  if (event.data?.type === "GET_VERSION") {
+  if (event.data && event.data.type === "GET_VERSION") {
     event.source.postMessage({ version: APP_VERSION });
   }
 });
