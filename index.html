@@ -181,6 +181,7 @@ function showUpdateToast() {
     <div style="display:flex;gap:8px;flex:1;align-items:center">
       <input id="nameInput" type="text" placeholder="Your display name" />
       <input id="roomInput" type="text" placeholder="Room name (default: global)" />
+      <input id="roomPassInput" type="password" placeholder="Room password (optional)" />
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <input id="msgInput" type="text" placeholder="Type a message and press Enter" />
@@ -224,6 +225,7 @@ const onlineUsersEl = document.getElementById('onlineUsers');
 const darkModeBtn = document.getElementById('darkModeBtn');
 const nameLockIcon = document.getElementById("nameLockIcon");
 const leaveRoomBtn = document.getElementById("leaveRoomBtn");
+const roomPassInput = document.getElementById("roomPassInput");
 
 let displayName = localStorage.getItem('displayName') || '';
 let roomName = localStorage.getItem('roomName') || 'global';
@@ -286,6 +288,15 @@ function colorForId(id){
 }
 
 auth.onAuthStateChanged(user=>{ if(!user) auth.signInAnonymously(); else uid=user.uid; });
+
+  function hashPassword(str){
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash.toString();
+}
 
 function setupPresence(room){
   const conRef=db.ref('.info/connected');
@@ -442,20 +453,50 @@ sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); else startTyping(); });
 msgInput.addEventListener('input', startTyping);
 
-roomInput.addEventListener('change', () => {
-  // Update global roomName
-  roomName = roomInput.value.trim() || 'global';
+roomInput.addEventListener("change", () => {
+  const newRoom = roomInput.value.trim() || "global";
+  const password = roomPassInput.value.trim();
+  const metaRef = db.ref("rooms_meta/" + newRoom);
 
-  // Update header & localStorage
-  roomNameEl.textContent = roomName;
-  localStorage.setItem('roomName', roomName);
+  metaRef.once("value", snap => {
+    const data = snap.val();
 
-  // Re-setup presence and messages for the new room
-  messagesEl.innerHTML = '';
-  setupPresence(roomName);
-  listenRoom(roomName);
-  watchPresence(roomName);
-  watchTyping(roomName);
+    // 🔒 Existing private room
+    if (data && data.private) {
+      if (!password) {
+        alert("🔒 This room requires a password");
+        roomInput.value = roomName;
+        return;
+      }
+      if (hashPassword(password) !== data.password) {
+        alert("❌ Wrong password");
+        roomInput.value = roomName;
+        return;
+      }
+    }
+
+    // 🆕 Create private room
+    if (!data && password) {
+      metaRef.set({
+        private: true,
+        password: hashPassword(password),
+        createdAt: Date.now()
+      });
+    }
+
+    // ✅ Join room
+    roomName = newRoom;
+    roomNameEl.textContent = newRoom + (data?.private ? " 🔒" : "");
+    localStorage.setItem("roomName", roomName);
+
+    messagesEl.innerHTML = "";
+    setupPresence(roomName);
+    listenRoom(roomName);
+    watchPresence(roomName);
+    watchTyping(roomName);
+
+    roomPassInput.value = ""; // clear password
+  });
 });
 
 
